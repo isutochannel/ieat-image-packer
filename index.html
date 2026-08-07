@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ภาพหลักฐาน IEAT กนอ.</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <style>
+        :root {
+            --bg-body: #f0f8ff; 
+            --bg-card: #ffffff;
+            --text-main: #1a365d;
+            --text-sub: #4a5568;
+            --border-color: #cbd5e1;
+            --accent-color: #2563eb;
+            --accent-hover: #1d4ed8;
+            --folder-bg: #f8fafc;
+            --folder-hover: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --target-glow: rgba(37, 99, 235, 0.3);
+            --danger: #ef4444;
+            --success: #10b981;
+        }
+
+        body.dark-theme {
+            --bg-body: #0f172a;
+            --bg-card: #1e293b;
+            --text-main: #f1f5f9;
+            --text-sub: #94a3b8;
+            --border-color: #334155;
+            --accent-color: #3b82f6;
+            --accent-hover: #60a5fa;
+            --folder-bg: #334155;
+            --folder-hover: #475569;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+            --target-glow: rgba(59, 130, 246, 0.4);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 20px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .header-container {
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
+        }
+        h2 { margin: 0; font-weight: 800; font-size: 1.8em; }
+        .theme-toggle {
+            background-color: var(--bg-card); color: var(--text-main);
+            border: 2px solid var(--border-color); padding: 8px 16px;
+            border-radius: 20px; cursor: pointer; font-weight: bold; transition: all 0.3s;
+        }
+        .theme-toggle:hover { border-color: var(--accent-color); }
+
+        .card {
+            background: var(--bg-card); padding: 25px; border-radius: 12px;
+            box-shadow: var(--shadow); margin-bottom: 25px; border: 1px solid var(--border-color);
+        }
+        h3 { margin-top: 0; color: var(--accent-color); font-size: 1.3em; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; }
+        
+        .form-row { display: grid; grid-template-columns: 1fr 2fr; gap: 15px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: var(--text-sub); }
+        input[type="text"] {
+            width: 100%; padding: 10px; border: 1px solid var(--border-color);
+            border-radius: 6px; box-sizing: border-box; background: var(--bg-card); color: var(--text-main);
+        }
+        input.readonly-date { background-color: var(--folder-bg); color: var(--text-sub); cursor: not-allowed; font-weight: bold; }
+
+        /* พื้นที่สำหรับวางรูป (กล่องเส้นประ) */
+        .paste-area {
+            border: 2px dashed var(--border-color); background-color: var(--folder-bg);
+            padding: 20px; text-align: center; border-radius: 8px;
+            color: var(--text-sub); font-size: 1.1em; margin: 15px 0;
+            cursor: pointer; transition: all 0.3s;
+        }
+        .paste-area:hover { background-color: var(--folder-hover); }
+        /* เมื่อกล่องไหนถูกเลือกให้เรืองแสง */
+        .paste-area.active-target {
+            border-color: var(--accent-color); background-color: var(--folder-hover);
+            box-shadow: 0 0 0 4px var(--target-glow); color: var(--accent-color); font-weight: bold;
+        }
+
+        /* Grid นิคมอุตสาหกรรม */
+        .folder-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px; margin-bottom: 15px; }
+        .folder-item {
+            display: flex; align-items: center; background: var(--folder-bg);
+            padding: 10px 15px; border-radius: 8px; border: 2px solid var(--border-color);
+            cursor: pointer; transition: all 0.2s ease;
+        }
+        .folder-item:hover { border-color: var(--text-sub); }
+        /* เมื่อโฟลเดอร์ถูกเลือก */
+        .folder-item.active-folder {
+            border-color: var(--accent-color); background: var(--bg-card);
+            box-shadow: 0 2px 8px var(--target-glow);
+        }
+        .folder-icon { font-size: 1.5em; margin-right: 12px; }
+        .folder-name { flex: 1; font-weight: 600; font-size: 0.95em; }
+        .badge {
+            background: var(--text-sub); color: #fff; padding: 4px 8px;
+            border-radius: 12px; font-size: 0.85em; font-weight: bold; min-width: 35px; text-align: center;
+        }
+        .folder-item.active-folder .badge { background: var(--accent-color); }
+
+        /* แสดงตัวอย่างรูปภาพรวม */
+        .overview-preview { text-align: center; margin-top: 15px; position: relative; display: inline-block; }
+        .overview-preview img { max-height: 250px; border-radius: 8px; box-shadow: var(--shadow); border: 2px solid var(--accent-color); }
+
+        /* แสดงตัวอย่างรูปภาพรายโฟลเดอร์ */
+        .preview-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; margin-top: 15px; }
+        .preview-item {
+            position: relative; border: 1px solid var(--border-color); border-radius: 8px;
+            padding: 10px; text-align: center; background: var(--folder-bg); box-shadow: var(--shadow);
+        }
+        .preview-item img { width: 100%; height: 130px; object-fit: cover; border-radius: 6px; }
+        .preview-item p { margin: 10px 0 0; font-size: 0.85em; word-break: break-all; line-height: 1.4; font-weight: 500; }
+        
+        /* ปุ่มลบรูป */
+        .delete-btn {
+            position: absolute; top: -8px; right: -8px; background: var(--danger); color: white;
+            border: none; border-radius: 50%; width: 28px; height: 28px; cursor: pointer;
+            font-weight: bold; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3); transition: transform 0.2s;
+        }
+        .delete-btn:hover { transform: scale(1.1); background: #b91c1c; }
+        
+        .btn {
+            background-color: var(--success); color: white; padding: 18px 20px; border: none;
+            border-radius: 8px; cursor: pointer; font-size: 1.2em; width: 100%; font-weight: bold;
+            box-shadow: 0 4px 6px rgba(16, 185, 129, 0.3); transition: all 0.3s;
+        }
+        .btn:hover { background-color: #059669; transform: translateY(-2px); }
+    </style>
+</head>
+<body>
+
+    <div class="header-container">
+        <h2 id="mainHeader">📦 ภาพหลักฐาน IEAT กนอ.</h2>
+        <button class="theme-toggle" onclick="toggleTheme()">🌗 สลับธีม</button>
+    </div>
+
+    <div class="card">
+        <h3 style="color: var(--text-main);">⚙️ 1. ตั้งค่าไฟล์ ZIP</h3>
+        <div class="form-row">
+            <div>
+                <label>วันที่ (อัตโนมัติ):</label>
+                <input type="text" id="zipDate" class="readonly-date" readonly>
+            </div>
+            <div>
+                <label>ชื่อต่อท้าย (ไม่บังคับ):</label>
+                <input type="text" id="zipName" placeholder="เช่น รายงานประจำเดือน">
+            </div>
+        </div>
+    </div>
+
+    <!-- หัวข้อที่ 2: รูปภาพรวม (แยกพื้นที่วางและ Preview ชัดเจน) -->
+    <div class="card">
+        <h3>⭐ 2. รูปภาพรวม (รายงานอุปกรณ์ IOT)</h3>
+        <p style="color: var(--text-sub); margin-bottom: 5px;">ภาพนี้จะถูกวางไว้ด้านนอกสุดของไฟล์ ZIP (ใส่ได้เพียง 1 ภาพเท่านั้น)</p>
+        
+        <div class="paste-area" id="pasteAreaOverview" onclick="selectSection('overview')">
+            👆 คลิกที่กรอบนี้ให้เรืองแสง แล้วกด <strong>Ctrl + V</strong> เพื่อวางภาพรวม
+        </div>
+        
+        <!-- พรีวิวของภาพรวมจะอยู่ตรงนี้ -->
+        <div style="text-align: center;">
+            <span id="overviewPlaceholder" style="color: var(--text-sub);">[ ยังไม่มีรูปภาพรวม ]</span>
+            <div id="overviewPreview" class="overview-preview" style="display: none;"></div>
+        </div>
+    </div>
+
+    <!-- หัวข้อที่ 3: ภาพรายนิคมอุตสาหกรรม (แยกพื้นที่วางและ Preview ชัดเจน) -->
+    <div class="card">
+        <h3>📂 3. ภาพแยกตามนิคมอุตสาหกรรม (14 แห่ง)</h3>
+        <p style="color: var(--text-sub); margin-bottom: 15px;">คลิกเลือกนิคมฯ ด้านล่าง จากนั้นคลิกที่กล่องวางภาพ แล้วกด Ctrl+V</p>
+        
+        <!-- จุดเลือกโฟลเดอร์ -->
+        <div class="folder-grid" id="folderGrid">
+            <!-- สร้างโดย JS -->
+        </div>
+
+        <!-- กล่องวางภาพสำหรับโฟลเดอร์ -->
+        <div class="paste-area" id="pasteAreaFolder" onclick="selectSection('folder')">
+            👆 เลือกนิคมฯ ด้านบน แล้วคลิกที่กรอบนี้ให้เรืองแสง จากนั้นกด <strong>Ctrl + V</strong>
+        </div>
+
+        <!-- พรีวิวของภาพรายนิคมจะอยู่ตรงนี้ -->
+        <div style="margin-top: 20px;">
+            <h4 style="margin-bottom: 10px; color: var(--text-main);">รายการรูปภาพแยกตามนิคมฯ (<span id="imgCount">0</span> รูป)</h4>
+            <div class="preview-container" id="previewContainer"></div>
+        </div>
+    </div>
+
+    <button class="btn" onclick="downloadZip()">⬇️ ดาวน์โหลดไฟล์ ZIP</button>
+    <br><br>
+
+    <script>
+        // --- 1. จัดการวันที่ ---
+        const today = new Date();
+        const dateString = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+        document.getElementById('zipDate').value = dateString;
+        document.getElementById('mainHeader').innerText = `📦 ภาพหลักฐาน IEAT กนอ. (${dateString})`;
+
+        // --- 2. สลับธีม ---
+        function toggleTheme() { document.body.classList.toggle('dark-theme'); }
+
+        // --- 3. ข้อมูลพื้นฐาน ---
+        const presetFolders = [
+            "นิคมอุตสาหกรรมบางชัน", "นิคมอุตสาหกรรมบางพลี", "นิคมอุตสาหกรรมบางปู",
+            "นิคมอุตสาหกรรมแก่งคอย", "นิคมอุตสาหกรรมลาดกระบัง", "นิคมอุตสาหกรรมนครหลวง (อยุธยา)",
+            "นิคมอุตสาหกรรมสมุทรสาคร", "นิคมอุตสาหกรรมแหลมฉบัง", "นิคมอุตสาหกรรมมาบตาพุด",
+            "นิคมอุตสาหกรรมสระแก้ว", "นิคมอุตสาหกรรมสงขลา (สะเดา)", "นิคมอุตสาหกรรมภาคใต้ (สงขลา)",
+            "นิคมอุตสาหกรรมภาคเหนือ (ลำพูน)", "นิคมอุตสาหกรรมพิจิตร"
+        ];
+        
+        let imageList = Array.from({length: presetFolders.length}, () => []);
+        let overviewImage = null; 
+        
+        // ตัวแปรเก็บสถานะว่ากำลังทำงานกับหัวข้อไหน (overview หรือ folder)
+        let activeSection = 'folder'; 
+        let activeFolderIndex = 0; 
+
+        // --- 4. สร้างปุ่มเลือกโฟลเดอร์ ---
+        function initFolders() {
+            const grid = document.getElementById('folderGrid');
+            presetFolders.forEach((name, i) => {
+                const div = document.createElement('div');
+                div.className = `folder-item`;
+                div.id = `folderItem_${i}`;
+                // เมื่อคลิกโฟลเดอร์ ให้เซ็ต section เป็น folder อัตโนมัติ
+                div.onclick = () => selectSection('folder', i);
+                
+                div.innerHTML = `
+                    <span class="folder-icon">📂</span>
+                    <span class="folder-name">${name}</span>
+                    <span class="badge" id="badge_${i}">0</span>
+                `;
+                grid.appendChild(div);
+            });
+            // เลือกหัวข้อ Folder และโฟลเดอร์ที่ 1 เป็นค่าเริ่มต้น
+            selectSection('folder', 0);
+        }
+
+        // --- 5. ฟังก์ชันเลือกหัวข้อเป้าหมาย ---
+        function selectSection(section, folderIndex = null) {
+            activeSection = section;
+            
+            // ล้าง Effect เรืองแสงของกล่องวางรูปทั้งคู่
+            document.getElementById('pasteAreaOverview').classList.remove('active-target');
+            document.getElementById('pasteAreaFolder').classList.remove('active-target');
+            
+            if (section === 'overview') {
+                // ไฮไลท์กล่องที่ 1
+                document.getElementById('pasteAreaOverview').classList.add('active-target');
+            } 
+            else if (section === 'folder') {
+                // ไฮไลท์กล่องที่ 2
+                document.getElementById('pasteAreaFolder').classList.add('active-target');
+                
+                if (folderIndex !== null) {
+                    activeFolderIndex = folderIndex;
+                    // ไฮไลท์โฟลเดอร์ที่ถูกคลิก
+                    document.querySelectorAll('.folder-item').forEach(el => el.classList.remove('active-folder'));
+                    document.getElementById(`folderItem_${folderIndex}`).classList.add('active-folder');
+                }
+            }
+        }
+
+        // --- 6. จับ Event การกด Ctrl+V ---
+        document.addEventListener('paste', function(e) {
+            const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+            let pastedOverview = false;
+            let pastedFolder = false;
+
+            for (let i = 0; i < items.length; i++) {
+                if (items[i].type.indexOf('image') !== -1) {
+                    const blob = items[i].getAsFile();
+                    const url = URL.createObjectURL(blob);
+                    
+                    if (activeSection === 'overview') {
+                        if (overviewImage) URL.revokeObjectURL(overviewImage.url);
+                        overviewImage = { blob, url };
+                        pastedOverview = true;
+                        break; // ภาพรวมรับแค่ภาพเดียวต่อการวาง
+                    } 
+                    else if (activeSection === 'folder') {
+                        imageList[activeFolderIndex].push({ blob, url });
+                        pastedFolder = true;
+                    }
+                }
+            }
+
+            if (pastedOverview) renderOverview();
+            if (pastedFolder) {
+                updateBadge(activeFolderIndex);
+                renderFolderPreviews();
+            }
+        });
+
+        // --- 7. แสดงผลภาพรวม (หัวข้อ 2) ---
+        function renderOverview() {
+            const previewDiv = document.getElementById('overviewPreview');
+            const placeholder = document.getElementById('overviewPlaceholder');
+            
+            if (overviewImage) {
+                placeholder.style.display = 'none';
+                previewDiv.style.display = 'inline-block';
+                const ext = overviewImage.blob.type.split('/')[1] === 'jpeg' ? 'jpg' : 'png';
+                
+                previewDiv.innerHTML = `
+                    <button class="delete-btn" onclick="removeOverview(event)" title="ลบภาพรวม">&times;</button>
+                    <img src="${overviewImage.url}" alt="รายงานอุปกรณ์ IOT">
+                    <p style="margin:8px 0 0; font-weight:bold; color:var(--accent-color);">📄 รายงานอุปกรณ์ IOT.${ext}</p>
+                `;
+            } else {
+                placeholder.style.display = 'inline';
+                previewDiv.style.display = 'none';
+                previewDiv.innerHTML = '';
+            }
+        }
+
+        function removeOverview(e) {
+            e.stopPropagation(); 
+            if (overviewImage) URL.revokeObjectURL(overviewImage.url);
+            overviewImage = null;
+            renderOverview();
+        }
+
+        // --- 8. แสดงผลรายโฟลเดอร์ (หัวข้อ 3) ---
+        function updateBadge(index) {
+            document.getElementById(`badge_${index}`).innerText = imageList[index].length;
+        }
+
+        function removeFolderImage(folderIndex, imgIndex) {
+            URL.revokeObjectURL(imageList[folderIndex][imgIndex].url);
+            imageList[folderIndex].splice(imgIndex, 1);
+            updateBadge(folderIndex);
+            renderFolderPreviews();
+        }
+
+        function renderFolderPreviews() {
+            const container = document.getElementById('previewContainer');
+            container.innerHTML = '';
+            let totalImages = 0;
+
+            imageList.forEach((folderImgs, folderIndex) => {
+                const folderName = presetFolders[folderIndex];
+                
+                folderImgs.forEach((item, imgIndex) => {
+                    totalImages++;
+                    const ext = item.blob.type.split('/')[1] === 'jpeg' ? 'jpg' : 'png';
+                    const fileName = `${folderName}_${imgIndex + 1}.${ext}`;
+                    
+                    const div = document.createElement('div');
+                    div.className = 'preview-item';
+                    div.innerHTML = `
+                        <button class="delete-btn" onclick="removeFolderImage(${folderIndex}, ${imgIndex})" title="ลบรูปนี้">&times;</button>
+                        <img src="${item.url}" alt="${fileName}">
+                        <p><strong>📂 ${folderName}</strong><br><span style="color:var(--text-sub);">${fileName}</span></p>
+                    `;
+                    container.appendChild(div);
+                });
+            });
+            document.getElementById('imgCount').innerText = totalImages;
+        }
+
+        // --- 9. สร้างและดาวน์โหลด ZIP ---
+        function downloadZip() {
+            let totalFolderImgs = imageList.reduce((sum, arr) => sum + arr.length, 0);
+            
+            if (totalFolderImgs === 0 && !overviewImage) {
+                alert('กรุณาวางรูปภาพอย่างน้อย 1 รูป (ในภาพรวม หรือ ในนิคมฯ) ก่อนดาวน์โหลด');
+                return;
+            }
+
+            const zip = new JSZip();
+            const dateVal = document.getElementById('zipDate').value;
+            const extraName = document.getElementById('zipName').value.trim();
+            
+            let finalZipName = `ภาพหลักฐาน_IEAT_กนอ_${dateVal}`;
+            if (extraName) finalZipName += `_${extraName}`;
+            finalZipName += `.zip`;
+
+            if (overviewImage) {
+                const ext = overviewImage.blob.type.split('/')[1] === 'jpeg' ? 'jpg' : 'png';
+                zip.file(`รายงานอุปกรณ์ IOT.${ext}`, overviewImage.blob);
+            }
+
+            for(let i = 0; i < presetFolders.length; i++) {
+                const folderName = presetFolders[i];
+                const folder = zip.folder(folderName);
+                
+                imageList[i].forEach((item, imgIndex) => {
+                    const ext = item.blob.type.split('/')[1] === 'jpeg' ? 'jpg' : 'png';
+                    const fileName = `${folderName}_${imgIndex + 1}.${ext}`;
+                    folder.file(fileName, item.blob);
+                });
+            }
+
+            zip.generateAsync({type: "blob"}).then(function(content) {
+                saveAs(content, finalZipName);
+            });
+        }
+
+        initFolders();
+    </script>
+</body>
+</html>
