@@ -7,134 +7,213 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <style>
+        /* -------------------------------------------
+           🎨 THEME & VARIABLES
+        -------------------------------------------- */
         :root {
-            --bg-body: #f0f8ff; 
+            --bg-body: #f4f7fb; 
             --bg-card: #ffffff;
-            --text-main: #1a365d;
-            --text-sub: #4a5568;
-            --border-color: #cbd5e1;
-            --accent-color: #2563eb;
-            --accent-hover: #1d4ed8;
+            --text-main: #1e293b;
+            --text-sub: #64748b;
+            --border-color: #e2e8f0;
+            --accent-color: #3b82f6;
+            --accent-hover: #2563eb;
             --folder-bg: #f8fafc;
-            --folder-hover: #e2e8f0;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            --target-glow: rgba(37, 99, 235, 0.3);
+            --folder-hover: #f1f5f9;
+            --shadow-soft: 0 10px 40px -10px rgba(0, 0, 0, 0.08);
+            --shadow-hover: 0 20px 40px -10px rgba(59, 130, 246, 0.15);
+            --target-glow: rgba(59, 130, 246, 0.25);
             --danger: #ef4444;
             --success: #10b981;
+            --radius-card: 20px;
+            --radius-item: 12px;
+            --transition-smooth: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         body.dark-theme {
             --bg-body: #0f172a;
             --bg-card: #1e293b;
-            --text-main: #f1f5f9;
+            --text-main: #f8fafc;
             --text-sub: #94a3b8;
             --border-color: #334155;
             --accent-color: #3b82f6;
             --accent-hover: #60a5fa;
-            --folder-bg: #334155;
-            --folder-hover: #475569;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+            --folder-bg: #0f172a;
+            --folder-hover: #1e293b;
+            --shadow-soft: 0 10px 40px -10px rgba(0, 0, 0, 0.5);
+            --shadow-hover: 0 20px 40px -10px rgba(59, 130, 246, 0.3);
             --target-glow: rgba(59, 130, 246, 0.4);
         }
 
+        /* -------------------------------------------
+           ✨ GLOBAL & TYPOGRAPHY
+        -------------------------------------------- */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--bg-body);
             color: var(--text-main);
-            max-width: 1100px;
+            max-width: 1000px; /* ลดความกว้างลงนิดให้ดูโล่งตา */
             margin: 0 auto;
-            padding: 20px;
-            transition: background-color 0.3s, color 0.3s;
+            padding: 40px 20px;
+            transition: var(--transition-smooth);
+            line-height: 1.6;
         }
 
-        .header-container {
-            display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
-        }
-        h2 { margin: 0; font-weight: 800; font-size: 1.8em; }
+        .header-container { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        h2 { margin: 0; font-weight: 800; font-size: 2em; letter-spacing: -0.5px; }
+        h3 { margin-top: 0; color: var(--accent-color); font-size: 1.25em; border-bottom: 2px solid var(--folder-bg); padding-bottom: 12px; margin-bottom: 20px; }
+        
         .theme-toggle {
             background-color: var(--bg-card); color: var(--text-main);
-            border: 2px solid var(--border-color); padding: 8px 16px;
-            border-radius: 20px; cursor: pointer; font-weight: bold; transition: all 0.3s;
+            border: 1px solid var(--border-color); padding: 10px 20px;
+            border-radius: 30px; cursor: pointer; font-weight: bold; 
+            transition: var(--transition-smooth); box-shadow: var(--shadow-soft);
         }
-        .theme-toggle:hover { border-color: var(--accent-color); }
+        .theme-toggle:hover { border-color: var(--accent-color); transform: translateY(-2px); }
+        .theme-toggle:active { transform: scale(0.95); } /* อนิเมชันตอนกด */
 
+        /* -------------------------------------------
+           🗂️ CARDS & FORMS
+        -------------------------------------------- */
         .card {
-            background: var(--bg-card); padding: 25px; border-radius: 12px;
-            box-shadow: var(--shadow); margin-bottom: 25px; border: 1px solid var(--border-color);
+            background: var(--bg-card); padding: 30px; border-radius: var(--radius-card);
+            box-shadow: var(--shadow-soft); margin-bottom: 30px; border: 1px solid rgba(255,255,255,0.1);
+            transition: var(--transition-smooth);
         }
-        h3 { margin-top: 0; color: var(--accent-color); font-size: 1.3em; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; }
+        .card:hover { box-shadow: var(--shadow-hover); }
         
-        .form-row { display: grid; grid-template-columns: 1fr 2fr; gap: 15px; }
-        label { display: block; margin-bottom: 8px; font-weight: bold; color: var(--text-sub); }
+        .form-row { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-sub); font-size: 0.95em; }
         input[type="text"] {
-            width: 100%; padding: 10px; border: 1px solid var(--border-color);
-            border-radius: 6px; box-sizing: border-box; background: var(--bg-card); color: var(--text-main);
+            width: 100%; padding: 12px 15px; border: 2px solid var(--folder-bg);
+            border-radius: var(--radius-item); box-sizing: border-box; 
+            background: var(--folder-bg); color: var(--text-main);
+            transition: var(--transition-smooth); font-size: 1em; outline: none;
         }
-        input.readonly-date { background-color: var(--folder-bg); color: var(--text-sub); cursor: not-allowed; font-weight: bold; }
+        input[type="text"]:focus { border-color: var(--accent-color); background: var(--bg-card); box-shadow: 0 0 0 4px var(--target-glow); }
+        input.readonly-date { color: var(--text-sub); cursor: not-allowed; font-weight: bold; opacity: 0.8; }
 
-        /* พื้นที่สำหรับวางรูป (กล่องเส้นประ) */
+        /* -------------------------------------------
+           🖱️ DRAG & DROP AREA
+        -------------------------------------------- */
         .paste-area {
-            border: 2px dashed var(--border-color); background-color: var(--folder-bg);
-            padding: 20px; text-align: center; border-radius: 8px;
-            color: var(--text-sub); font-size: 1.1em; margin: 15px 0;
-            cursor: pointer; transition: all 0.3s;
+            border: 2px dashed var(--border-color); background-color: var(--bg-card);
+            padding: 30px 20px; text-align: center; border-radius: var(--radius-item);
+            color: var(--text-sub); font-size: 1.1em; margin: 20px 0;
+            cursor: pointer; transition: var(--transition-smooth); position: relative;
         }
-        .paste-area:hover { background-color: var(--folder-hover); }
-        /* เมื่อกล่องไหนถูกเลือกให้เรืองแสง */
+        .paste-area:hover, .paste-area.drag-over { 
+            background-color: var(--folder-bg); border-color: var(--accent-color); 
+            transform: translateY(-2px);
+        }
+        .paste-area:active { transform: scale(0.98); } /* อนิเมชันตอนคลิกกล่องวาง */
         .paste-area.active-target {
             border-color: var(--accent-color); background-color: var(--folder-hover);
             box-shadow: 0 0 0 4px var(--target-glow); color: var(--accent-color); font-weight: bold;
         }
 
-        /* Grid นิคมอุตสาหกรรม */
-        .folder-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px; margin-bottom: 15px; }
+        /* -------------------------------------------
+           📁 FOLDERS GRID
+        -------------------------------------------- */
+        .folder-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; margin-bottom: 20px; }
         .folder-item {
             display: flex; align-items: center; background: var(--folder-bg);
-            padding: 10px 15px; border-radius: 8px; border: 2px solid var(--border-color);
-            cursor: pointer; transition: all 0.2s ease;
+            padding: 12px 18px; border-radius: var(--radius-item); border: 2px solid transparent;
+            cursor: pointer; transition: var(--transition-smooth);
         }
-        .folder-item:hover { border-color: var(--text-sub); }
-        /* เมื่อโฟลเดอร์ถูกเลือก */
+        .folder-item:hover { background: var(--folder-hover); transform: translateY(-2px); }
+        .folder-item:active { transform: scale(0.96); } /* อนิเมชันเด้งดึ๋งตอนคลิกโฟลเดอร์ */
         .folder-item.active-folder {
             border-color: var(--accent-color); background: var(--bg-card);
-            box-shadow: 0 2px 8px var(--target-glow);
+            box-shadow: 0 4px 15px var(--target-glow);
         }
-        .folder-icon { font-size: 1.5em; margin-right: 12px; }
+        .folder-icon { font-size: 1.5em; margin-right: 12px; transition: transform 0.3s; }
+        .folder-item:hover .folder-icon { transform: scale(1.1); }
         .folder-name { flex: 1; font-weight: 600; font-size: 0.95em; }
         .badge {
-            background: var(--text-sub); color: #fff; padding: 4px 8px;
-            border-radius: 12px; font-size: 0.85em; font-weight: bold; min-width: 35px; text-align: center;
+            background: var(--border-color); color: var(--text-sub); padding: 4px 10px;
+            border-radius: 20px; font-size: 0.85em; font-weight: bold; min-width: 30px; text-align: center;
+            transition: var(--transition-smooth);
         }
-        .folder-item.active-folder .badge { background: var(--accent-color); }
+        .folder-item.active-folder .badge { background: var(--accent-color); color: #fff; }
 
-        /* แสดงตัวอย่างรูปภาพรวม */
-        .overview-preview { text-align: center; margin-top: 15px; position: relative; display: inline-block; }
-        .overview-preview img { max-height: 250px; border-radius: 8px; box-shadow: var(--shadow); border: 2px solid var(--accent-color); }
+        /* -------------------------------------------
+           🖼️ PREVIEWS & ANIMATIONS
+        -------------------------------------------- */
+        @keyframes fadeInScale {
+            0% { opacity: 0; transform: scale(0.9) translateY(10px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
 
-        /* แสดงตัวอย่างรูปภาพรายโฟลเดอร์ */
-        .preview-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; margin-top: 15px; }
+        .overview-preview { text-align: center; margin-top: 20px; position: relative; display: inline-block; animation: fadeInScale 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .overview-preview img { max-height: 250px; border-radius: var(--radius-item); box-shadow: var(--shadow-soft); border: 2px solid var(--accent-color); }
+
+        .preview-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; margin-top: 15px; }
         .preview-item {
-            position: relative; border: 1px solid var(--border-color); border-radius: 8px;
-            padding: 10px; text-align: center; background: var(--folder-bg); box-shadow: var(--shadow);
+            position: relative; border: 1px solid var(--border-color); border-radius: var(--radius-item);
+            padding: 10px; text-align: center; background: var(--bg-card); box-shadow: var(--shadow-soft);
+            animation: fadeInScale 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; /* อนิเมชันภาพเด้งขึ้นมา */
         }
-        .preview-item img { width: 100%; height: 130px; object-fit: cover; border-radius: 6px; }
-        .preview-item p { margin: 10px 0 0; font-size: 0.85em; word-break: break-all; line-height: 1.4; font-weight: 500; }
+        .preview-item img { width: 100%; height: 120px; object-fit: cover; border-radius: 8px; transition: transform 0.3s; }
+        .preview-item:hover img { transform: scale(1.03); }
+        .preview-item p { margin: 10px 0 0; font-size: 0.85em; word-break: break-all; line-height: 1.4; font-weight: 600; }
         
-        /* ปุ่มลบรูป */
         .delete-btn {
-            position: absolute; top: -8px; right: -8px; background: var(--danger); color: white;
-            border: none; border-radius: 50%; width: 28px; height: 28px; cursor: pointer;
+            position: absolute; top: -10px; right: -10px; background: var(--danger); color: white;
+            border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer;
             font-weight: bold; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3); transition: transform 0.2s;
+            box-shadow: 0 4px 10px rgba(239, 68, 68, 0.4); transition: var(--transition-smooth); z-index: 2;
         }
-        .delete-btn:hover { transform: scale(1.1); background: #b91c1c; }
-        
+        .delete-btn:hover { transform: scale(1.15) rotate(90deg); background: #dc2626; } /* หมุนนิดๆ ตอนโฮเวอร์ */
+
+        /* -------------------------------------------
+           🔘 BUTTONS
+        -------------------------------------------- */
+        .action-buttons { display: flex; gap: 15px; justify-content: flex-end; align-items: center; margin-bottom: 30px; }
         .btn {
-            background-color: var(--success); color: white; padding: 18px 20px; border: none;
-            border-radius: 8px; cursor: pointer; font-size: 1.2em; width: 100%; font-weight: bold;
-            box-shadow: 0 4px 6px rgba(16, 185, 129, 0.3); transition: all 0.3s;
+            background-color: var(--success); color: white; padding: 16px 30px; border: none;
+            border-radius: 30px; cursor: pointer; font-size: 1.15em; font-weight: bold;
+            box-shadow: 0 10px 20px -10px rgba(16, 185, 129, 0.6); transition: var(--transition-smooth); flex: 1; text-align: center;
         }
-        .btn:hover { background-color: #059669; transform: translateY(-2px); }
+        .btn:hover { background-color: #059669; transform: translateY(-3px); box-shadow: 0 15px 25px -10px rgba(16, 185, 129, 0.8); }
+        .btn:active { transform: scale(0.96); } /* อนิเมชันตอนกด */
+
+        .btn-small {
+            background-color: var(--accent-color); color: white; padding: 16px 25px; border: none;
+            border-radius: 30px; cursor: pointer; font-size: 1em; font-weight: bold; transition: var(--transition-smooth);
+            box-shadow: 0 10px 20px -10px rgba(59, 130, 246, 0.6);
+        }
+        .btn-small:hover { background-color: var(--accent-hover); transform: translateY(-3px); box-shadow: 0 15px 25px -10px rgba(59, 130, 246, 0.8); }
+        .btn-small:active { transform: scale(0.96); }
+
+        /* -------------------------------------------
+           🔍 MODAL (POPUP)
+        -------------------------------------------- */
+        @keyframes popUp {
+            0% { opacity: 0; transform: scale(0.95) translateY(20px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(15, 23, 42, 0.4); z-index: 1000;
+            justify-content: center; align-items: center; backdrop-filter: blur(8px);
+            opacity: 0; transition: opacity 0.3s ease;
+        }
+        .modal.show { opacity: 1; }
+        .modal-content {
+            background-color: var(--bg-card); padding: 40px; border-radius: 24px;
+            width: 90%; max-width: 900px; max-height: 85vh; overflow-y: auto;
+            position: relative; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+            animation: popUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .close-modal {
+            position: absolute; top: 20px; right: 25px; font-size: 2em; font-weight: bold;
+            color: var(--text-sub); cursor: pointer; transition: var(--transition-smooth);
+            width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--folder-bg);
+        }
+        .close-modal:hover { color: var(--danger); background: #fee2e2; transform: rotate(90deg); }
+        .modal-section-title { margin-top: 30px; border-bottom: 2px solid var(--folder-bg); padding-bottom: 10px; color: var(--text-main); }
     </style>
 </head>
 <body>
@@ -145,7 +224,7 @@
     </div>
 
     <div class="card">
-        <h3 style="color: var(--text-main);">⚙️ 1. ตั้งค่าไฟล์ ZIP</h3>
+        <h3>⚙️ 1. ตั้งค่าไฟล์ ZIP</h3>
         <div class="form-row">
             <div>
                 <label>วันที่ (อัตโนมัติ):</label>
@@ -158,58 +237,64 @@
         </div>
     </div>
 
-    <!-- หัวข้อที่ 2: รูปภาพรวม (แยกพื้นที่วางและ Preview ชัดเจน) -->
     <div class="card">
         <h3>⭐ 2. รูปภาพรวม (รายงานอุปกรณ์ IOT)</h3>
-        <p style="color: var(--text-sub); margin-bottom: 5px;">ภาพนี้จะถูกวางไว้ด้านนอกสุดของไฟล์ ZIP (ใส่ได้เพียง 1 ภาพเท่านั้น)</p>
+        <p style="color: var(--text-sub); margin-bottom: 5px; font-size: 0.9em;">ภาพนี้จะถูกวางไว้ด้านนอกสุดของไฟล์ ZIP (ใส่ได้ 1 ภาพ)</p>
         
         <div class="paste-area" id="pasteAreaOverview" onclick="selectSection('overview')">
-            👆 คลิกที่กรอบนี้ให้เรืองแสง แล้วกด <strong>Ctrl + V</strong> เพื่อวางภาพรวม
+            👆 คลิกให้กรอบเรืองแสง กด <strong>Ctrl + V</strong> หรือ <strong>ลากไฟล์รูปมาวาง</strong>
         </div>
         
-        <!-- พรีวิวของภาพรวมจะอยู่ตรงนี้ -->
         <div style="text-align: center;">
-            <span id="overviewPlaceholder" style="color: var(--text-sub);">[ ยังไม่มีรูปภาพรวม ]</span>
+            <span id="overviewPlaceholder" style="color: var(--text-sub); font-size: 0.95em;">[ ยังไม่มีรูปภาพรวม ]</span>
             <div id="overviewPreview" class="overview-preview" style="display: none;"></div>
         </div>
     </div>
 
-    <!-- หัวข้อที่ 3: ภาพรายนิคมอุตสาหกรรม (แยกพื้นที่วางและ Preview ชัดเจน) -->
     <div class="card">
         <h3>📂 3. ภาพแยกตามนิคมอุตสาหกรรม (14 แห่ง)</h3>
-        <p style="color: var(--text-sub); margin-bottom: 15px;">คลิกเลือกนิคมฯ ด้านล่าง จากนั้นคลิกที่กล่องวางภาพ แล้วกด Ctrl+V</p>
+        <p style="color: var(--text-sub); margin-bottom: 20px; font-size: 0.9em;">คลิกเลือกนิคมฯ ด้านล่าง จากนั้นกด Ctrl+V หรือลากไฟล์มาใส่</p>
         
-        <!-- จุดเลือกโฟลเดอร์ -->
         <div class="folder-grid" id="folderGrid">
             <!-- สร้างโดย JS -->
         </div>
 
-        <!-- กล่องวางภาพสำหรับโฟลเดอร์ -->
         <div class="paste-area" id="pasteAreaFolder" onclick="selectSection('folder')">
-            👆 เลือกนิคมฯ ด้านบน แล้วคลิกที่กรอบนี้ให้เรืองแสง จากนั้นกด <strong>Ctrl + V</strong>
+            👆 เลือกนิคมฯ ด้านบน คลิกให้กรอบเรืองแสง แล้วกด <strong>Ctrl + V</strong> หรือ <strong>ลากไฟล์รูปมาวาง</strong>
         </div>
 
-        <!-- พรีวิวของภาพรายนิคมจะอยู่ตรงนี้ -->
-        <div style="margin-top: 20px;">
-            <h4 style="margin-bottom: 10px; color: var(--text-main);">รายการรูปภาพแยกตามนิคมฯ (<span id="imgCount">0</span> รูป)</h4>
+        <div style="margin-top: 25px; background: var(--folder-bg); padding: 25px; border-radius: var(--radius-card); border: 1px solid var(--border-color);">
+            <h4 style="margin: 0 0 15px 0; color: var(--text-main); font-weight: 700;">
+                กำลังแสดงผล: <span id="currentFolderNameDisplay" style="color: var(--accent-color);">นิคมอุตสาหกรรมบางชัน</span> 
+                <span style="font-size: 0.85em; color: var(--text-sub); font-weight: normal;">(<span id="imgCount">0</span> รูป)</span>
+            </h4>
             <div class="preview-container" id="previewContainer"></div>
         </div>
     </div>
 
-    <button class="btn" onclick="downloadZip()">⬇️ ดาวน์โหลดไฟล์ ZIP</button>
-    <br><br>
+    <div class="action-buttons">
+        <button class="btn-small" onclick="openModal()">🔍 ดูภาพรวมทั้งหมด</button>
+        <button class="btn" onclick="downloadZip()">⬇️ ดาวน์โหลดเป็น ZIP</button>
+    </div>
+
+    <!-- ป๊อปอัป (Modal) -->
+    <div id="allImagesModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <h2 style="margin-top:0; color: var(--accent-color); font-size: 1.8em;">📋 ตรวจสอบภาพทั้งหมด</h2>
+            <p style="color: var(--text-sub); margin-top: -5px;">รายการภาพที่คุณเตรียมไว้สำหรับแพ็คเป็นไฟล์ ZIP</p>
+            <div id="modalContentContainer"></div>
+        </div>
+    </div>
 
     <script>
-        // --- 1. จัดการวันที่ ---
         const today = new Date();
         const dateString = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
         document.getElementById('zipDate').value = dateString;
         document.getElementById('mainHeader').innerText = `📦 ภาพหลักฐาน IEAT กนอ. (${dateString})`;
 
-        // --- 2. สลับธีม ---
         function toggleTheme() { document.body.classList.toggle('dark-theme'); }
 
-        // --- 3. ข้อมูลพื้นฐาน ---
         const presetFolders = [
             "นิคมอุตสาหกรรมบางชัน", "นิคมอุตสาหกรรมบางพลี", "นิคมอุตสาหกรรมบางปู",
             "นิคมอุตสาหกรรมแก่งคอย", "นิคมอุตสาหกรรมลาดกระบัง", "นิคมอุตสาหกรรมนครหลวง (อยุธยา)",
@@ -220,19 +305,15 @@
         
         let imageList = Array.from({length: presetFolders.length}, () => []);
         let overviewImage = null; 
-        
-        // ตัวแปรเก็บสถานะว่ากำลังทำงานกับหัวข้อไหน (overview หรือ folder)
         let activeSection = 'folder'; 
         let activeFolderIndex = 0; 
 
-        // --- 4. สร้างปุ่มเลือกโฟลเดอร์ ---
         function initFolders() {
             const grid = document.getElementById('folderGrid');
             presetFolders.forEach((name, i) => {
                 const div = document.createElement('div');
                 div.className = `folder-item`;
                 div.id = `folderItem_${i}`;
-                // เมื่อคลิกโฟลเดอร์ ให้เซ็ต section เป็น folder อัตโนมัติ
                 div.onclick = () => selectSection('folder', i);
                 
                 div.innerHTML = `
@@ -242,53 +323,49 @@
                 `;
                 grid.appendChild(div);
             });
-            // เลือกหัวข้อ Folder และโฟลเดอร์ที่ 1 เป็นค่าเริ่มต้น
             selectSection('folder', 0);
+            
+            setupDragAndDrop('pasteAreaOverview', 'overview');
+            setupDragAndDrop('pasteAreaFolder', 'folder');
         }
 
-        // --- 5. ฟังก์ชันเลือกหัวข้อเป้าหมาย ---
         function selectSection(section, folderIndex = null) {
             activeSection = section;
             
-            // ล้าง Effect เรืองแสงของกล่องวางรูปทั้งคู่
             document.getElementById('pasteAreaOverview').classList.remove('active-target');
             document.getElementById('pasteAreaFolder').classList.remove('active-target');
             
             if (section === 'overview') {
-                // ไฮไลท์กล่องที่ 1
                 document.getElementById('pasteAreaOverview').classList.add('active-target');
             } 
             else if (section === 'folder') {
-                // ไฮไลท์กล่องที่ 2
                 document.getElementById('pasteAreaFolder').classList.add('active-target');
                 
                 if (folderIndex !== null) {
                     activeFolderIndex = folderIndex;
-                    // ไฮไลท์โฟลเดอร์ที่ถูกคลิก
                     document.querySelectorAll('.folder-item').forEach(el => el.classList.remove('active-folder'));
                     document.getElementById(`folderItem_${folderIndex}`).classList.add('active-folder');
                 }
+                renderFolderPreviews();
             }
         }
 
-        // --- 6. จับ Event การกด Ctrl+V ---
-        document.addEventListener('paste', function(e) {
-            const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+        function processFiles(files, targetSection) {
             let pastedOverview = false;
             let pastedFolder = false;
 
-            for (let i = 0; i < items.length; i++) {
-                if (items[i].type.indexOf('image') !== -1) {
-                    const blob = items[i].getAsFile();
+            for (let i = 0; i < files.length; i++) {
+                if (files[i].type.indexOf('image') !== -1) {
+                    const blob = files[i];
                     const url = URL.createObjectURL(blob);
                     
-                    if (activeSection === 'overview') {
+                    if (targetSection === 'overview') {
                         if (overviewImage) URL.revokeObjectURL(overviewImage.url);
                         overviewImage = { blob, url };
                         pastedOverview = true;
-                        break; // ภาพรวมรับแค่ภาพเดียวต่อการวาง
+                        break; 
                     } 
-                    else if (activeSection === 'folder') {
+                    else if (targetSection === 'folder') {
                         imageList[activeFolderIndex].push({ blob, url });
                         pastedFolder = true;
                     }
@@ -300,9 +377,50 @@
                 updateBadge(activeFolderIndex);
                 renderFolderPreviews();
             }
+        }
+
+        document.addEventListener('paste', function(e) {
+            const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+            const files = [];
+            for (let i = 0; i < items.length; i++) {
+                if (items[i].kind === 'file') {
+                    files.push(items[i].getAsFile());
+                }
+            }
+            if(files.length > 0) {
+                processFiles(files, activeSection);
+            }
         });
 
-        // --- 7. แสดงผลภาพรวม (หัวข้อ 2) ---
+        function setupDragAndDrop(elementId, sectionName) {
+            const el = document.getElementById(elementId);
+            
+            el.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                el.classList.add('drag-over');
+            });
+            
+            el.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                el.classList.remove('drag-over');
+            });
+            
+            el.addEventListener('drop', (e) => {
+                e.preventDefault();
+                el.classList.remove('drag-over');
+                
+                if (sectionName === 'folder') {
+                    selectSection('folder', activeFolderIndex);
+                } else {
+                    selectSection('overview');
+                }
+                
+                if (e.dataTransfer.files.length > 0) {
+                    processFiles(e.dataTransfer.files, sectionName);
+                }
+            });
+        }
+
         function renderOverview() {
             const previewDiv = document.getElementById('overviewPreview');
             const placeholder = document.getElementById('overviewPlaceholder');
@@ -315,7 +433,7 @@
                 previewDiv.innerHTML = `
                     <button class="delete-btn" onclick="removeOverview(event)" title="ลบภาพรวม">&times;</button>
                     <img src="${overviewImage.url}" alt="รายงานอุปกรณ์ IOT">
-                    <p style="margin:8px 0 0; font-weight:bold; color:var(--accent-color);">📄 รายงานอุปกรณ์ IOT.${ext}</p>
+                    <p style="margin:8px 0 0; font-weight:600; color:var(--text-main);">📄 รายงานอุปกรณ์ IOT.${ext}</p>
                 `;
             } else {
                 placeholder.style.display = 'inline';
@@ -331,7 +449,6 @@
             renderOverview();
         }
 
-        // --- 8. แสดงผลรายโฟลเดอร์ (หัวข้อ 3) ---
         function updateBadge(index) {
             document.getElementById(`badge_${index}`).innerText = imageList[index].length;
         }
@@ -346,35 +463,96 @@
         function renderFolderPreviews() {
             const container = document.getElementById('previewContainer');
             container.innerHTML = '';
-            let totalImages = 0;
+            const folderName = presetFolders[activeFolderIndex];
+            const currentFolderImgs = imageList[activeFolderIndex];
 
-            imageList.forEach((folderImgs, folderIndex) => {
-                const folderName = presetFolders[folderIndex];
+            currentFolderImgs.forEach((item, imgIndex) => {
+                const ext = item.blob.type.split('/')[1] === 'jpeg' ? 'jpg' : 'png';
+                const fileName = `${folderName}_${imgIndex + 1}.${ext}`;
                 
-                folderImgs.forEach((item, imgIndex) => {
-                    totalImages++;
-                    const ext = item.blob.type.split('/')[1] === 'jpeg' ? 'jpg' : 'png';
-                    const fileName = `${folderName}_${imgIndex + 1}.${ext}`;
-                    
-                    const div = document.createElement('div');
-                    div.className = 'preview-item';
-                    div.innerHTML = `
-                        <button class="delete-btn" onclick="removeFolderImage(${folderIndex}, ${imgIndex})" title="ลบรูปนี้">&times;</button>
-                        <img src="${item.url}" alt="${fileName}">
-                        <p><strong>📂 ${folderName}</strong><br><span style="color:var(--text-sub);">${fileName}</span></p>
-                    `;
-                    container.appendChild(div);
-                });
+                const div = document.createElement('div');
+                div.className = 'preview-item';
+                div.innerHTML = `
+                    <button class="delete-btn" onclick="removeFolderImage(${activeFolderIndex}, ${imgIndex})" title="ลบรูปนี้">&times;</button>
+                    <img src="${item.url}" alt="${fileName}">
+                    <p><strong>📂 ${folderName}</strong><br><span style="color:var(--text-sub);">${fileName}</span></p>
+                `;
+                container.appendChild(div);
             });
-            document.getElementById('imgCount').innerText = totalImages;
+            
+            document.getElementById('currentFolderNameDisplay').innerText = folderName;
+            document.getElementById('imgCount').innerText = currentFolderImgs.length;
         }
 
-        // --- 9. สร้างและดาวน์โหลด ZIP ---
+        function openModal() {
+            const container = document.getElementById('modalContentContainer');
+            container.innerHTML = '';
+            let totalFound = 0;
+
+            if (overviewImage) {
+                totalFound++;
+                const ext = overviewImage.blob.type.split('/')[1] === 'jpeg' ? 'jpg' : 'png';
+                container.innerHTML += `
+                    <h3 class="modal-section-title">⭐ รูปภาพรวม</h3>
+                    <div class="preview-container">
+                        <div class="preview-item">
+                            <img src="${overviewImage.url}">
+                            <p style="font-weight:600; color:var(--text-main);">📄 รายงานอุปกรณ์ IOT.${ext}</p>
+                        </div>
+                    </div>
+                `;
+            }
+
+            imageList.forEach((folderImgs, folderIndex) => {
+                if (folderImgs.length > 0) {
+                    totalFound += folderImgs.length;
+                    const folderName = presetFolders[folderIndex];
+                    let imgsHtml = '';
+                    
+                    folderImgs.forEach((item, imgIndex) => {
+                        const ext = item.blob.type.split('/')[1] === 'jpeg' ? 'jpg' : 'png';
+                        const fileName = `${folderName}_${imgIndex + 1}.${ext}`;
+                        imgsHtml += `
+                            <div class="preview-item">
+                                <img src="${item.url}">
+                                <p><span style="color:var(--text-sub); font-weight:600;">${fileName}</span></p>
+                            </div>
+                        `;
+                    });
+
+                    container.innerHTML += `
+                        <h3 class="modal-section-title">📂 ${folderName} (${folderImgs.length} รูป)</h3>
+                        <div class="preview-container">${imgsHtml}</div>
+                    `;
+                }
+            });
+
+            if (totalFound === 0) {
+                container.innerHTML = `<p style="text-align:center; color:var(--text-sub); padding:40px; font-size:1.1em;">ยังไม่มีรูปภาพใดๆ ถูกเพิ่มเข้ามาครับ</p>`;
+            }
+
+            const modal = document.getElementById('allImagesModal');
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('show'), 10);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('allImagesModal');
+            modal.classList.remove('show');
+            setTimeout(() => modal.style.display = 'none', 300);
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('allImagesModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+
         function downloadZip() {
             let totalFolderImgs = imageList.reduce((sum, arr) => sum + arr.length, 0);
-            
             if (totalFolderImgs === 0 && !overviewImage) {
-                alert('กรุณาวางรูปภาพอย่างน้อย 1 รูป (ในภาพรวม หรือ ในนิคมฯ) ก่อนดาวน์โหลด');
+                alert('กรุณาวางรูปภาพอย่างน้อย 1 รูป ก่อนดาวน์โหลด');
                 return;
             }
 
