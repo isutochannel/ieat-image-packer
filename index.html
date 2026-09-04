@@ -6,6 +6,8 @@
     <title>ภาพหลักฐาน IEAT กนอ.</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
+    
     <style>
         /* -------------------------------------------
            🎨 THEME & VARIABLES
@@ -24,6 +26,7 @@
             --shadow-hover: 0 20px 40px -10px rgba(59, 130, 246, 0.15);
             --target-glow: rgba(59, 130, 246, 0.25);
             --danger: #ef4444;
+            --danger-hover: #dc2626;
             --success: #10b981;
             --radius-card: 20px;
             --radius-item: 12px;
@@ -45,14 +48,11 @@
             --target-glow: rgba(59, 130, 246, 0.4);
         }
 
-        /* -------------------------------------------
-           ✨ GLOBAL & TYPOGRAPHY
-        -------------------------------------------- */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: var(--bg-body);
             color: var(--text-main);
-            max-width: 1000px; /* ลดความกว้างลงนิดให้ดูโล่งตา */
+            max-width: 1000px; 
             margin: 0 auto;
             padding: 40px 20px;
             transition: var(--transition-smooth);
@@ -70,11 +70,8 @@
             transition: var(--transition-smooth); box-shadow: var(--shadow-soft);
         }
         .theme-toggle:hover { border-color: var(--accent-color); transform: translateY(-2px); }
-        .theme-toggle:active { transform: scale(0.95); } /* อนิเมชันตอนกด */
+        .theme-toggle:active { transform: scale(0.95); } 
 
-        /* -------------------------------------------
-           🗂️ CARDS & FORMS
-        -------------------------------------------- */
         .card {
             background: var(--bg-card); padding: 30px; border-radius: var(--radius-card);
             box-shadow: var(--shadow-soft); margin-bottom: 30px; border: 1px solid rgba(255,255,255,0.1);
@@ -93,9 +90,6 @@
         input[type="text"]:focus { border-color: var(--accent-color); background: var(--bg-card); box-shadow: 0 0 0 4px var(--target-glow); }
         input.readonly-date { color: var(--text-sub); cursor: not-allowed; font-weight: bold; opacity: 0.8; }
 
-        /* -------------------------------------------
-           🖱️ DRAG & DROP AREA
-        -------------------------------------------- */
         .paste-area {
             border: 2px dashed var(--border-color); background-color: var(--bg-card);
             padding: 30px 20px; text-align: center; border-radius: var(--radius-item);
@@ -106,15 +100,12 @@
             background-color: var(--folder-bg); border-color: var(--accent-color); 
             transform: translateY(-2px);
         }
-        .paste-area:active { transform: scale(0.98); } /* อนิเมชันตอนคลิกกล่องวาง */
+        .paste-area:active { transform: scale(0.98); } 
         .paste-area.active-target {
             border-color: var(--accent-color); background-color: var(--folder-hover);
             box-shadow: 0 0 0 4px var(--target-glow); color: var(--accent-color); font-weight: bold;
         }
 
-        /* -------------------------------------------
-           📁 FOLDERS GRID
-        -------------------------------------------- */
         .folder-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; margin-bottom: 20px; }
         .folder-item {
             display: flex; align-items: center; background: var(--folder-bg);
@@ -122,7 +113,7 @@
             cursor: pointer; transition: var(--transition-smooth);
         }
         .folder-item:hover { background: var(--folder-hover); transform: translateY(-2px); }
-        .folder-item:active { transform: scale(0.96); } /* อนิเมชันเด้งดึ๋งตอนคลิกโฟลเดอร์ */
+        .folder-item:active { transform: scale(0.96); } 
         .folder-item.active-folder {
             border-color: var(--accent-color); background: var(--bg-card);
             box-shadow: 0 4px 15px var(--target-glow);
@@ -137,24 +128,29 @@
         }
         .folder-item.active-folder .badge { background: var(--accent-color); color: #fff; }
 
-        /* -------------------------------------------
-           🖼️ PREVIEWS & ANIMATIONS
-        -------------------------------------------- */
         @keyframes fadeInScale {
             0% { opacity: 0; transform: scale(0.9) translateY(10px); }
             100% { opacity: 1; transform: scale(1) translateY(0); }
         }
 
         .overview-preview { text-align: center; margin-top: 20px; position: relative; display: inline-block; animation: fadeInScale 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-        .overview-preview img { max-height: 250px; border-radius: var(--radius-item); box-shadow: var(--shadow-soft); border: 2px solid var(--accent-color); }
+        .overview-preview img { 
+            max-height: 250px; border-radius: var(--radius-item); box-shadow: var(--shadow-soft); 
+            border: 2px solid var(--accent-color); cursor: zoom-in;
+            transition: transform 0.3s;
+        }
+        .overview-preview img:hover { transform: scale(1.02); }
 
         .preview-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; margin-top: 15px; }
         .preview-item {
             position: relative; border: 1px solid var(--border-color); border-radius: var(--radius-item);
             padding: 10px; text-align: center; background: var(--bg-card); box-shadow: var(--shadow-soft);
-            animation: fadeInScale 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; /* อนิเมชันภาพเด้งขึ้นมา */
+            animation: fadeInScale 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
-        .preview-item img { width: 100%; height: 120px; object-fit: cover; border-radius: 8px; transition: transform 0.3s; }
+        .preview-item img { 
+            width: 100%; height: 120px; object-fit: cover; border-radius: 8px; 
+            transition: transform 0.3s; cursor: zoom-in;
+        }
         .preview-item:hover img { transform: scale(1.03); }
         .preview-item p { margin: 10px 0 0; font-size: 0.85em; word-break: break-all; line-height: 1.4; font-weight: 600; }
         
@@ -164,19 +160,16 @@
             font-weight: bold; display: flex; align-items: center; justify-content: center;
             box-shadow: 0 4px 10px rgba(239, 68, 68, 0.4); transition: var(--transition-smooth); z-index: 2;
         }
-        .delete-btn:hover { transform: scale(1.15) rotate(90deg); background: #dc2626; } /* หมุนนิดๆ ตอนโฮเวอร์ */
+        .delete-btn:hover { transform: scale(1.15) rotate(90deg); background: #dc2626; } 
 
-        /* -------------------------------------------
-           🔘 BUTTONS
-        -------------------------------------------- */
-        .action-buttons { display: flex; gap: 15px; justify-content: flex-end; align-items: center; margin-bottom: 30px; }
+        .action-buttons { display: flex; gap: 15px; justify-content: flex-end; align-items: center; margin-bottom: 30px; flex-wrap: wrap; }
         .btn {
             background-color: var(--success); color: white; padding: 16px 30px; border: none;
             border-radius: 30px; cursor: pointer; font-size: 1.15em; font-weight: bold;
             box-shadow: 0 10px 20px -10px rgba(16, 185, 129, 0.6); transition: var(--transition-smooth); flex: 1; text-align: center;
         }
         .btn:hover { background-color: #059669; transform: translateY(-3px); box-shadow: 0 15px 25px -10px rgba(16, 185, 129, 0.8); }
-        .btn:active { transform: scale(0.96); } /* อนิเมชันตอนกด */
+        .btn:active { transform: scale(0.96); } 
 
         .btn-small {
             background-color: var(--accent-color); color: white; padding: 16px 25px; border: none;
@@ -185,6 +178,12 @@
         }
         .btn-small:hover { background-color: var(--accent-hover); transform: translateY(-3px); box-shadow: 0 15px 25px -10px rgba(59, 130, 246, 0.8); }
         .btn-small:active { transform: scale(0.96); }
+
+        .btn-danger {
+            background-color: var(--bg-card); color: var(--danger); padding: 16px 25px; border: 2px solid var(--danger);
+            border-radius: 30px; cursor: pointer; font-size: 1em; font-weight: bold; transition: var(--transition-smooth);
+        }
+        .btn-danger:hover { background-color: var(--danger); color: white; transform: translateY(-3px); box-shadow: 0 10px 20px -10px rgba(239, 68, 68, 0.6); }
 
         /* -------------------------------------------
            🔍 MODAL (POPUP)
@@ -196,7 +195,7 @@
 
         .modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(15, 23, 42, 0.4); z-index: 1000;
+            background-color: rgba(15, 23, 42, 0.7); z-index: 1000;
             justify-content: center; align-items: center; backdrop-filter: blur(8px);
             opacity: 0; transition: opacity 0.3s ease;
         }
@@ -210,10 +209,15 @@
         .close-modal {
             position: absolute; top: 20px; right: 25px; font-size: 2em; font-weight: bold;
             color: var(--text-sub); cursor: pointer; transition: var(--transition-smooth);
-            width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--folder-bg);
+            width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--folder-bg); z-index: 10;
         }
         .close-modal:hover { color: var(--danger); background: #fee2e2; transform: rotate(90deg); }
         .modal-section-title { margin-top: 30px; border-bottom: 2px solid var(--folder-bg); padding-bottom: 10px; color: var(--text-main); }
+
+        .modal-image-view {
+            max-width: 100%; max-height: 70vh; object-fit: contain; border-radius: 12px;
+            display: block; margin: 0 auto;
+        }
     </style>
 </head>
 <body>
@@ -221,6 +225,10 @@
     <div class="header-container">
         <h2 id="mainHeader">📦 ภาพหลักฐาน IEAT กนอ.</h2>
         <button class="theme-toggle" onclick="toggleTheme()">🌗 สลับธีม</button>
+    </div>
+
+    <div id="saveNotification" style="display: none; background: #e0f2fe; color: #0369a1; padding: 10px 20px; border-radius: 8px; margin-bottom: 20px; text-align: center; font-weight: bold; font-size: 0.9em; border: 1px solid #bae6fd;">
+        💾 กู้คืนข้อมูลที่คุณทำค้างไว้ล่าสุดเรียบร้อยแล้ว
     </div>
 
     <div class="card">
@@ -232,7 +240,7 @@
             </div>
             <div>
                 <label>ชื่อต่อท้าย (ไม่บังคับ):</label>
-                <input type="text" id="zipName" placeholder="เช่น รายงานประจำเดือน">
+                <input type="text" id="zipName" placeholder="เช่น รายงานประจำเดือน" oninput="saveDataToDB()">
             </div>
         </div>
     </div>
@@ -256,8 +264,7 @@
         <p style="color: var(--text-sub); margin-bottom: 20px; font-size: 0.9em;">คลิกเลือกนิคมฯ ด้านล่าง จากนั้นกด Ctrl+V หรือลากไฟล์มาใส่</p>
         
         <div class="folder-grid" id="folderGrid">
-            <!-- สร้างโดย JS -->
-        </div>
+            </div>
 
         <div class="paste-area" id="pasteAreaFolder" onclick="selectSection('folder')">
             👆 เลือกนิคมฯ ด้านบน คลิกให้กรอบเรืองแสง แล้วกด <strong>Ctrl + V</strong> หรือ <strong>ลากไฟล์รูปมาวาง</strong>
@@ -273,21 +280,20 @@
     </div>
 
     <div class="action-buttons">
-        <button class="btn-small" onclick="openModal()">🔍 ดูภาพรวมทั้งหมด</button>
+        <button class="btn-danger" onclick="clearAllData()">🗑️ ล้างข้อมูลทั้งหมด</button>
+        <button class="btn-small" onclick="openModal('allImages')">🔍 ดูภาพรวมทั้งหมด</button>
         <button class="btn" onclick="downloadZip()">⬇️ ดาวน์โหลดเป็น ZIP</button>
     </div>
 
-    <!-- ป๊อปอัป (Modal) -->
-    <div id="allImagesModal" class="modal">
-        <div class="modal-content">
+    <div id="dynamicModal" class="modal">
+        <div class="modal-content" id="modalContentBox">
             <span class="close-modal" onclick="closeModal()">&times;</span>
-            <h2 style="margin-top:0; color: var(--accent-color); font-size: 1.8em;">📋 ตรวจสอบภาพทั้งหมด</h2>
-            <p style="color: var(--text-sub); margin-top: -5px;">รายการภาพที่คุณเตรียมไว้สำหรับแพ็คเป็นไฟล์ ZIP</p>
             <div id="modalContentContainer"></div>
         </div>
     </div>
 
     <script>
+        // --- 1. ตั้งค่าเริ่มต้น ---
         const today = new Date();
         const dateString = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
         document.getElementById('zipDate').value = dateString;
@@ -308,6 +314,69 @@
         let activeSection = 'folder'; 
         let activeFolderIndex = 0; 
 
+        // --- 2. ระบบ LOCALFORAGE (จัดเก็บข้อมูลป้องกันรีเฟรช) ---
+        function saveDataToDB() {
+            const appState = {
+                zipName: document.getElementById('zipName').value,
+                activeFolderIndex: activeFolderIndex,
+                overviewBlob: overviewImage ? overviewImage.blob : null,
+                folderBlobs: imageList.map(folder => folder.map(item => item.blob))
+            };
+            localforage.setItem('ieatAppData', appState).catch(err => console.error("Save Error:", err));
+        }
+
+        function loadDataFromDB() {
+            localforage.getItem('ieatAppData').then(function(appState) {
+                if(appState) {
+                    if(appState.zipName) document.getElementById('zipName').value = appState.zipName;
+                    
+                    if (appState.overviewBlob) {
+                        overviewImage = {
+                            blob: appState.overviewBlob,
+                            url: URL.createObjectURL(appState.overviewBlob)
+                        };
+                        renderOverview();
+                    }
+
+                    if (appState.folderBlobs) {
+                        imageList = appState.folderBlobs.map(folder => folder.map(blob => ({
+                            blob: blob,
+                            url: URL.createObjectURL(blob)
+                        })));
+                    }
+
+                    const targetIndex = appState.activeFolderIndex !== undefined ? appState.activeFolderIndex : 0;
+                    presetFolders.forEach((_, i) => updateBadge(i));
+                    selectSection('folder', targetIndex);
+                    
+                    const notif = document.getElementById('saveNotification');
+                    notif.style.display = 'block';
+                    setTimeout(() => { notif.style.display = 'none'; }, 4000);
+                }
+            }).catch(function(err) {
+                console.log("No previous data found or error loading:", err);
+            });
+        }
+
+        function clearAllData() {
+            if(confirm("คุณต้องการลบรูปภาพทั้งหมดที่วางไว้ และเริ่มใหม่ใช่หรือไม่? (การกระทำนี้ไม่สามารถย้อนกลับได้)")) {
+                if(overviewImage) URL.revokeObjectURL(overviewImage.url);
+                imageList.forEach(folder => folder.forEach(item => URL.revokeObjectURL(item.url)));
+                
+                overviewImage = null;
+                imageList = Array.from({length: presetFolders.length}, () => []);
+                document.getElementById('zipName').value = '';
+                
+                localforage.removeItem('ieatAppData').then(() => {
+                    renderOverview();
+                    presetFolders.forEach((_, i) => updateBadge(i));
+                    selectSection('folder', 0);
+                    alert("ล้างข้อมูลเรียบร้อยแล้ว เริ่มต้นใหม่ได้เลยครับ!");
+                });
+            }
+        }
+
+        // --- 3. ฟังก์ชันหลักของระบบ ---
         function initFolders() {
             const grid = document.getElementById('folderGrid');
             presetFolders.forEach((name, i) => {
@@ -327,6 +396,8 @@
             
             setupDragAndDrop('pasteAreaOverview', 'overview');
             setupDragAndDrop('pasteAreaFolder', 'folder');
+
+            loadDataFromDB();
         }
 
         function selectSection(section, folderIndex = null) {
@@ -348,6 +419,7 @@
                 }
                 renderFolderPreviews();
             }
+            saveDataToDB();
         }
 
         function processFiles(files, targetSection) {
@@ -377,6 +449,8 @@
                 updateBadge(activeFolderIndex);
                 renderFolderPreviews();
             }
+            
+            if(pastedOverview || pastedFolder) saveDataToDB();
         }
 
         document.addEventListener('paste', function(e) {
@@ -395,32 +469,18 @@
         function setupDragAndDrop(elementId, sectionName) {
             const el = document.getElementById(elementId);
             
-            el.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                el.classList.add('drag-over');
-            });
-            
-            el.addEventListener('dragleave', (e) => {
-                e.preventDefault();
-                el.classList.remove('drag-over');
-            });
-            
+            el.addEventListener('dragover', (e) => { e.preventDefault(); el.classList.add('drag-over'); });
+            el.addEventListener('dragleave', (e) => { e.preventDefault(); el.classList.remove('drag-over'); });
             el.addEventListener('drop', (e) => {
                 e.preventDefault();
                 el.classList.remove('drag-over');
-                
-                if (sectionName === 'folder') {
-                    selectSection('folder', activeFolderIndex);
-                } else {
-                    selectSection('overview');
-                }
-                
-                if (e.dataTransfer.files.length > 0) {
-                    processFiles(e.dataTransfer.files, sectionName);
-                }
+                if (sectionName === 'folder') { selectSection('folder', activeFolderIndex); } 
+                else { selectSection('overview'); }
+                if (e.dataTransfer.files.length > 0) { processFiles(e.dataTransfer.files, sectionName); }
             });
         }
 
+        // --- 4. แสดงผล & ลบภาพ ---
         function renderOverview() {
             const previewDiv = document.getElementById('overviewPreview');
             const placeholder = document.getElementById('overviewPlaceholder');
@@ -432,7 +492,7 @@
                 
                 previewDiv.innerHTML = `
                     <button class="delete-btn" onclick="removeOverview(event)" title="ลบภาพรวม">&times;</button>
-                    <img src="${overviewImage.url}" alt="รายงานอุปกรณ์ IOT">
+                    <img src="${overviewImage.url}" alt="รายงานอุปกรณ์ IOT" onclick="openModal('imageView', '${overviewImage.url}', 'รายงานอุปกรณ์ IOT.${ext}')">
                     <p style="margin:8px 0 0; font-weight:600; color:var(--text-main);">📄 รายงานอุปกรณ์ IOT.${ext}</p>
                 `;
             } else {
@@ -447,6 +507,7 @@
             if (overviewImage) URL.revokeObjectURL(overviewImage.url);
             overviewImage = null;
             renderOverview();
+            saveDataToDB();
         }
 
         function updateBadge(index) {
@@ -458,6 +519,7 @@
             imageList[folderIndex].splice(imgIndex, 1);
             updateBadge(folderIndex);
             renderFolderPreviews();
+            saveDataToDB();
         }
 
         function renderFolderPreviews() {
@@ -474,7 +536,7 @@
                 div.className = 'preview-item';
                 div.innerHTML = `
                     <button class="delete-btn" onclick="removeFolderImage(${activeFolderIndex}, ${imgIndex})" title="ลบรูปนี้">&times;</button>
-                    <img src="${item.url}" alt="${fileName}">
+                    <img src="${item.url}" alt="${fileName}" onclick="openModal('imageView', '${item.url}', '${fileName}')">
                     <p><strong>📂 ${folderName}</strong><br><span style="color:var(--text-sub);">${fileName}</span></p>
                 `;
                 container.appendChild(div);
@@ -484,71 +546,90 @@
             document.getElementById('imgCount').innerText = currentFolderImgs.length;
         }
 
-        function openModal() {
+        // --- 5. ระบบ MODAL (ดูภาพใหญ่ & ตรวจสอบทั้งหมด) ---
+        function openModal(type, imageUrl = '', imageTitle = '') {
             const container = document.getElementById('modalContentContainer');
+            const modalBox = document.getElementById('modalContentBox');
             container.innerHTML = '';
-            let totalFound = 0;
 
-            if (overviewImage) {
-                totalFound++;
-                const ext = overviewImage.blob.type.split('/')[1] === 'jpeg' ? 'jpg' : 'png';
-                container.innerHTML += `
-                    <h3 class="modal-section-title">⭐ รูปภาพรวม</h3>
-                    <div class="preview-container">
-                        <div class="preview-item">
-                            <img src="${overviewImage.url}">
-                            <p style="font-weight:600; color:var(--text-main);">📄 รายงานอุปกรณ์ IOT.${ext}</p>
-                        </div>
-                    </div>
+            if (type === 'imageView') {
+                modalBox.style.maxWidth = '1000px';
+                modalBox.style.padding = '30px';
+                container.innerHTML = `
+                    <h2 style="margin-top:0; color: var(--accent-color); font-size: 1.5em; text-align:center;">${imageTitle}</h2>
+                    <img src="${imageUrl}" class="modal-image-view">
                 `;
-            }
+            } 
+            else if (type === 'allImages') {
+                modalBox.style.maxWidth = '900px';
+                modalBox.style.padding = '40px';
+                let totalFound = 0;
 
-            imageList.forEach((folderImgs, folderIndex) => {
-                if (folderImgs.length > 0) {
-                    totalFound += folderImgs.length;
-                    const folderName = presetFolders[folderIndex];
-                    let imgsHtml = '';
-                    
-                    folderImgs.forEach((item, imgIndex) => {
-                        const ext = item.blob.type.split('/')[1] === 'jpeg' ? 'jpg' : 'png';
-                        const fileName = `${folderName}_${imgIndex + 1}.${ext}`;
-                        imgsHtml += `
-                            <div class="preview-item">
-                                <img src="${item.url}">
-                                <p><span style="color:var(--text-sub); font-weight:600;">${fileName}</span></p>
-                            </div>
-                        `;
-                    });
+                container.innerHTML = `
+                    <h2 style="margin-top:0; color: var(--accent-color); font-size: 1.8em;">📋 ตรวจสอบภาพทั้งหมด</h2>
+                    <p style="color: var(--text-sub); margin-top: -5px; margin-bottom:20px;">รายการภาพที่คุณเตรียมไว้สำหรับแพ็คเป็นไฟล์ ZIP</p>
+                `;
 
+                if (overviewImage) {
+                    totalFound++;
+                    const ext = overviewImage.blob.type.split('/')[1] === 'jpeg' ? 'jpg' : 'png';
                     container.innerHTML += `
-                        <h3 class="modal-section-title">📂 ${folderName} (${folderImgs.length} รูป)</h3>
-                        <div class="preview-container">${imgsHtml}</div>
+                        <h3 class="modal-section-title">⭐ รูปภาพรวม</h3>
+                        <div class="preview-container">
+                            <div class="preview-item">
+                                <img src="${overviewImage.url}" onclick="openModal('imageView', '${overviewImage.url}', 'รายงานอุปกรณ์ IOT.${ext}')" style="cursor: zoom-in;">
+                                <p style="font-weight:600; color:var(--text-main);">📄 รายงานอุปกรณ์ IOT.${ext}</p>
+                            </div>
+                        </div>
                     `;
                 }
-            });
 
-            if (totalFound === 0) {
-                container.innerHTML = `<p style="text-align:center; color:var(--text-sub); padding:40px; font-size:1.1em;">ยังไม่มีรูปภาพใดๆ ถูกเพิ่มเข้ามาครับ</p>`;
+                imageList.forEach((folderImgs, folderIndex) => {
+                    if (folderImgs.length > 0) {
+                        totalFound += folderImgs.length;
+                        const folderName = presetFolders[folderIndex];
+                        let imgsHtml = '';
+                        
+                        folderImgs.forEach((item, imgIndex) => {
+                            const ext = item.blob.type.split('/')[1] === 'jpeg' ? 'jpg' : 'png';
+                            const fileName = `${folderName}_${imgIndex + 1}.${ext}`;
+                            imgsHtml += `
+                                <div class="preview-item">
+                                    <img src="${item.url}" onclick="openModal('imageView', '${item.url}', '${fileName}')" style="cursor: zoom-in;">
+                                    <p><span style="color:var(--text-sub); font-weight:600;">${fileName}</span></p>
+                                </div>
+                            `;
+                        });
+
+                        container.innerHTML += `
+                            <h3 class="modal-section-title">📂 ${folderName} (${folderImgs.length} รูป)</h3>
+                            <div class="preview-container">${imgsHtml}</div>
+                        `;
+                    }
+                });
+
+                if (totalFound === 0) {
+                    container.innerHTML += `<p style="text-align:center; color:var(--text-sub); padding:40px; font-size:1.1em;">ยังไม่มีรูปภาพใดๆ ถูกเพิ่มเข้ามาครับ</p>`;
+                }
             }
 
-            const modal = document.getElementById('allImagesModal');
+            const modal = document.getElementById('dynamicModal');
             modal.style.display = 'flex';
             setTimeout(() => modal.classList.add('show'), 10);
         }
 
         function closeModal() {
-            const modal = document.getElementById('allImagesModal');
+            const modal = document.getElementById('dynamicModal');
             modal.classList.remove('show');
             setTimeout(() => modal.style.display = 'none', 300);
         }
 
         window.onclick = function(event) {
-            const modal = document.getElementById('allImagesModal');
-            if (event.target === modal) {
-                closeModal();
-            }
+            const modal = document.getElementById('dynamicModal');
+            if (event.target === modal) closeModal();
         }
 
+        // --- 6. สร้างไฟล์ ZIP ---
         function downloadZip() {
             let totalFolderImgs = imageList.reduce((sum, arr) => sum + arr.length, 0);
             if (totalFolderImgs === 0 && !overviewImage) {
@@ -585,6 +666,7 @@
             });
         }
 
+        // เริ่มต้นการทำงาน
         initFolders();
     </script>
 </body>
