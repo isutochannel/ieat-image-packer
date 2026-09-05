@@ -195,7 +195,7 @@
 
         .modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(15, 23, 42, 0.7); z-index: 1000;
+            background-color: rgba(15, 23, 42, 0.8); z-index: 1000;
             justify-content: center; align-items: center; backdrop-filter: blur(8px);
             opacity: 0; transition: opacity 0.3s ease;
         }
@@ -203,7 +203,7 @@
         .modal-content {
             background-color: var(--bg-card); padding: 40px; border-radius: 24px;
             width: 90%; max-width: 900px; max-height: 85vh; overflow-y: auto;
-            position: relative; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);
+            position: relative; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
             animation: popUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
         .close-modal {
@@ -293,7 +293,6 @@
     </div>
 
     <script>
-        // --- 1. ตั้งค่าเริ่มต้น ---
         const today = new Date();
         const dateString = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
         document.getElementById('zipDate').value = dateString;
@@ -313,9 +312,12 @@
         let overviewImage = null; 
         let activeSection = 'folder'; 
         let activeFolderIndex = 0; 
+        
+        // --- 🚩 ระบบป้องกันโหลดข้อมูลทับซ้อน ---
+        let isAppReady = false; 
 
-        // --- 2. ระบบ LOCALFORAGE (จัดเก็บข้อมูลป้องกันรีเฟรช) ---
         function saveDataToDB() {
+            if (!isAppReady) return; // ถ้าแอปยังดึงข้อมูลเก่าไม่เสร็จ ห้ามบันทึกเด็ดขาด!
             const appState = {
                 zipName: document.getElementById('zipName').value,
                 activeFolderIndex: activeFolderIndex,
@@ -347,14 +349,18 @@
 
                     const targetIndex = appState.activeFolderIndex !== undefined ? appState.activeFolderIndex : 0;
                     presetFolders.forEach((_, i) => updateBadge(i));
-                    selectSection('folder', targetIndex);
+                    selectSection('folder', targetIndex, false); // ส่งค่า false เพื่อบอกว่าไม่ต้องบันทึกซ้ำ
                     
-                    const notif = document.getElementById('saveNotification');
-                    notif.style.display = 'block';
-                    setTimeout(() => { notif.style.display = 'none'; }, 4000);
+                    if (appState.overviewBlob || appState.folderBlobs) {
+                        const notif = document.getElementById('saveNotification');
+                        notif.style.display = 'block';
+                        setTimeout(() => { notif.style.display = 'none'; }, 4000);
+                    }
                 }
+                isAppReady = true; // โหลดเสร็จแล้ว ปลดล็อกให้เซฟได้
             }).catch(function(err) {
                 console.log("No previous data found or error loading:", err);
+                isAppReady = true; // ถึงโหลดไม่สำเร็จ ก็ต้องปลดล็อกให้ทำงานต่อได้
             });
         }
 
@@ -376,7 +382,6 @@
             }
         }
 
-        // --- 3. ฟังก์ชันหลักของระบบ ---
         function initFolders() {
             const grid = document.getElementById('folderGrid');
             presetFolders.forEach((name, i) => {
@@ -392,15 +397,18 @@
                 `;
                 grid.appendChild(div);
             });
-            selectSection('folder', 0);
+            
+            // สั่งเลือกหน้าต่างแรก แต่ยัง "ไม่เซฟ" ข้อมูล
+            selectSection('folder', 0, false); 
             
             setupDragAndDrop('pasteAreaOverview', 'overview');
             setupDragAndDrop('pasteAreaFolder', 'folder');
 
+            // เริ่มดึงข้อมูลจากฐานข้อมูล
             loadDataFromDB();
         }
 
-        function selectSection(section, folderIndex = null) {
+        function selectSection(section, folderIndex = null, shouldSave = true) {
             activeSection = section;
             
             document.getElementById('pasteAreaOverview').classList.remove('active-target');
@@ -419,7 +427,7 @@
                 }
                 renderFolderPreviews();
             }
-            saveDataToDB();
+            if(shouldSave) saveDataToDB();
         }
 
         function processFiles(files, targetSection) {
@@ -480,7 +488,6 @@
             });
         }
 
-        // --- 4. แสดงผล & ลบภาพ ---
         function renderOverview() {
             const previewDiv = document.getElementById('overviewPreview');
             const placeholder = document.getElementById('overviewPlaceholder');
@@ -546,7 +553,6 @@
             document.getElementById('imgCount').innerText = currentFolderImgs.length;
         }
 
-        // --- 5. ระบบ MODAL (ดูภาพใหญ่ & ตรวจสอบทั้งหมด) ---
         function openModal(type, imageUrl = '', imageTitle = '') {
             const container = document.getElementById('modalContentContainer');
             const modalBox = document.getElementById('modalContentBox');
@@ -629,7 +635,6 @@
             if (event.target === modal) closeModal();
         }
 
-        // --- 6. สร้างไฟล์ ZIP ---
         function downloadZip() {
             let totalFolderImgs = imageList.reduce((sum, arr) => sum + arr.length, 0);
             if (totalFolderImgs === 0 && !overviewImage) {
