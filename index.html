@@ -198,7 +198,6 @@
             border-color: var(--folder-active-border); background: var(--folder-active-bg);
             box-shadow: 0 4px 12px var(--accent-glow);
         }
-        /* ถ้า active และยังไม่ complete ให้ป้ายเป็นสี accent */
         .folder-item.active-folder .badge:not(.completed) { background: var(--accent-primary); color: #fff; }
 
         /* -------------------------------------------
@@ -254,10 +253,13 @@
         .btn-danger-outline:hover { background: #fff1f2; transform: translateY(-2px); }
 
         /* -------------------------------------------
-           🔍 MODAL & ZOOM VIEWER
+           🔍 MULTI-MODAL SYSTEM
         -------------------------------------------- */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(15, 23, 42, 0.9); z-index: 9999; justify-content: center; align-items: center; backdrop-filter: blur(5px); opacity: 0; transition: opacity 0.3s ease; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s ease; }
         .modal.show { opacity: 1; }
+        
+        /* Modal - List view (z-index ต่ำกว่า Viewer) */
+        #listModal { background-color: rgba(15, 23, 42, 0.85); backdrop-filter: blur(5px); }
         .modal-content-list { background-color: var(--bg-card); border-radius: var(--radius-card); width: 90%; max-height: 85vh; overflow-y: auto; padding: 0; position: relative; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; border: 1px solid rgba(255,255,255,0.1); }
         .modal-content-list::-webkit-scrollbar { width: 6px; }
         .modal-content-list::-webkit-scrollbar-track { background: transparent; }
@@ -270,16 +272,19 @@
         .modal-section-title { margin-top: 0; font-size: 1.1em; color: var(--text-main); display: flex; align-items: center; gap: 10px; margin-bottom: 15px;}
         .modal-section-wrapper { background: var(--folder-bg); padding: 20px; border-radius: 16px; margin-bottom: 20px; border: 1px solid var(--border-color); }
 
-        /* Image Viewer */
+        /* Modal - Image Viewer (z-index สูงสุด ซ้อนทับ List ได้) */
+        #viewerModal { background-color: rgba(0, 0, 0, 0.95); z-index: 10005; backdrop-filter: blur(8px); }
         .modal-content-image { width: 100vw; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; }
         .image-viewer-container { width: 100%; height: 100%; overflow: hidden; display: flex; justify-content: center; align-items: center; padding: 20px; cursor: grab; }
         .image-viewer-container:active { cursor: grabbing; }
         .modal-image-view { max-width: 90vw; max-height: 90vh; object-fit: contain; border-radius: 8px; display: block; margin: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5); transition: transform 0.1s ease-out; transform-origin: center center; }
+        
         .image-viewer-header { position: absolute; top: 0; left: 0; width: 100%; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 100%); z-index: 10; }
         .image-viewer-title { color: white; margin: 0; font-size: 1.2em; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
         .close-viewer-btn { background: rgba(255,255,255,0.2); border: none; width: 40px; height: 40px; border-radius: 50%; font-size: 1.5em; color: white; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
         .close-viewer-btn:hover { background: rgba(255,255,255,0.4); transform: scale(1.1); }
-        .viewer-controls { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); display: flex; gap: 15px; background: rgba(15, 23, 42, 0.7); padding: 10px 20px; border-radius: 30px; backdrop-filter: blur(10px); z-index: 10; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); }
+        
+        .viewer-controls { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); display: flex; gap: 15px; background: rgba(15, 23, 42, 0.8); padding: 10px 20px; border-radius: 30px; backdrop-filter: blur(10px); z-index: 10; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); }
         .ctrl-btn { background: transparent; border: none; color: white; font-size: 1.2em; cursor: pointer; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
         .ctrl-btn:hover { background: rgba(255,255,255,0.2); }
         .ctrl-divider { width: 1px; background: rgba(255,255,255,0.2); margin: 0 5px; }
@@ -377,7 +382,7 @@
         <button class="btn btn-danger-outline" onclick="clearAllData()" title="ล้างรูปทั้งหมดเริ่มใหม่">
             <span>🗑️</span> ล้างกระดาน
         </button>
-        <button class="btn btn-secondary" onclick="openModal('allImages')">
+        <button class="btn btn-secondary" onclick="openListModal()">
             <span>🔍</span> ตรวจสอบรูปภาพ
         </button>
         <button class="btn btn-primary" onclick="downloadZip()">
@@ -385,7 +390,19 @@
         </button>
     </div>
 
-    <div id="dynamicModal" class="modal"></div>
+    <!-- 🌟 ระบบ Multi-Modal แยก 2 ชั้น (List & Viewer) 🌟 -->
+    
+    <!-- Modal 1: ดูรายการภาพทั้งหมด -->
+    <div id="listModal" class="modal">
+        <div class="modal-content-list" id="listModalContent">
+            <!-- ยัดผ่าน JS -->
+        </div>
+    </div>
+
+    <!-- Modal 2: ซูมดูภาพเดียว (ทับบน Modal 1 ได้) -->
+    <div id="viewerModal" class="modal">
+        <!-- ยัดผ่าน JS -->
+    </div>
 
     <script>
         // --- 1. ข้อมูลพื้นฐาน ---
@@ -443,11 +460,11 @@
                 overviewBlob: overviewImage ? overviewImage.blob : null,
                 folderBlobs: imageList.map(folder => folder.map(item => item.blob))
             };
-            localforage.setItem('ieatAppDataV7', appState).catch(err => console.error("Save Error:", err));
+            localforage.setItem('ieatAppDataV8', appState).catch(err => console.error("Save Error:", err));
         }
 
         function loadDataFromDB() {
-            localforage.getItem('ieatAppDataV7').then(function(appState) {
+            localforage.getItem('ieatAppDataV8').then(function(appState) {
                 if(appState) {
                     if (appState.overviewBlob) {
                         overviewImage = { blob: appState.overviewBlob, url: URL.createObjectURL(appState.overviewBlob) };
@@ -482,7 +499,7 @@
                 overviewImage = null;
                 imageList = Array.from({length: presetFolders.length}, () => []);
                 
-                localforage.removeItem('ieatAppDataV7').then(() => {
+                localforage.removeItem('ieatAppDataV8').then(() => {
                     renderOverview();
                     presetFolders.forEach((_, i) => updateBadge(i));
                     selectSection('folder', 0);
@@ -579,6 +596,9 @@
         }
 
         document.addEventListener('paste', function(e) {
+            // ไม่รับ Paste ถ้ายืนอยู่หน้าดูภาพ
+            if(document.getElementById('listModal').classList.contains('show') || document.getElementById('viewerModal').classList.contains('show')) return;
+
             const items = (e.clipboardData || e.originalEvent.clipboardData).items;
             const files = [];
             for (let i = 0; i < items.length; i++) {
@@ -597,7 +617,7 @@
             });
         }
 
-        // --- 6. แสดงผล UI ภาพ ---
+        // --- 6. แสดงผล UI ภาพหลัก ---
         function renderOverview() {
             const section = document.getElementById('overviewPreviewSection');
             const container = document.getElementById('overviewPreviewContainer');
@@ -611,7 +631,7 @@
                     <div class="preview-item">
                         <button class="delete-btn" onclick="removeOverview(event)" title="ลบ">&times;</button>
                         <div class="preview-img-wrapper">
-                            <img src="${overviewImage.url}" onclick="openModal('imageView', '${overviewImage.url}', '${fileName}')">
+                            <img src="${overviewImage.url}" onclick="openViewerModal('${overviewImage.url}', '${fileName}')">
                         </div>
                         <div class="preview-name">${fileName}</div>
                     </div>
@@ -637,10 +657,9 @@
             
             badge.innerText = `${count} / ${target}`;
             
-            // เช็คว่าครบเป้าหมายหรือยัง
             if (count >= target) {
                 badge.classList.add('completed');
-                badge.style.background = ""; badge.style.color = ""; // ใช้ CSS class จัดการแทน
+                badge.style.background = ""; badge.style.color = ""; 
             } else {
                 badge.classList.remove('completed');
                 if(count > 0 && !document.getElementById(`folderItem_${index}`).classList.contains('active-folder')) {
@@ -680,7 +699,7 @@
                     div.innerHTML = `
                         <button class="delete-btn" onclick="removeFolderImage(${activeFolderIndex}, ${imgIndex}, event)" title="ลบ">&times;</button>
                         <div class="preview-img-wrapper">
-                            <img src="${item.url}" onclick="openModal('imageView', '${item.url}', '${fileName}')">
+                            <img src="${item.url}" onclick="openViewerModal('${item.url}', '${fileName}')">
                         </div>
                         <div class="preview-name" title="${fileName}">${fileName}</div>
                     `;
@@ -696,7 +715,7 @@
             countTag.innerText = `${currentFolderImgs.length} / ${folderInfo.target} รูป`;
             
             // อัปเดตกล่องโน้ตและ Progress Bar
-            document.getElementById('reminderStatusText').innerText = `${currentFolderImgs.length} / ${folderInfo.target} รูป`;
+            document.getElementById('reminderStatusText').innerText = `${currentFolderImgs.length} / ${folderInfo.target} ภาพ`;
             
             let progressPct = (currentFolderImgs.length / folderInfo.target) * 100;
             if (progressPct > 100) progressPct = 100;
@@ -713,158 +732,197 @@
             }
         }
 
-        // --- 7. Modal (ระบบซูมและเลื่อนภาพ) ---
-        let currentZoomScale = 1;
-        let isDragging = false;
-        let startPos = { x: 0, y: 0 };
-        let currentTranslate = { x: 0, y: 0 };
-        let imgPos = { x: 0, y: 0 };
+        // --- 7. ระบบ Multi-Modal (แยก List กับ Viewer) ---
+        
+        function openListModal() {
+            const listContent = document.getElementById('listModalContent');
+            let totalFound = 0;
+            let contentHtml = '';
 
-        function openModal(type, imageUrl = '', imageTitle = '') {
-            const modal = document.getElementById('dynamicModal');
-            modal.innerHTML = ''; 
-
-            if (type === 'imageView') {
-                currentZoomScale = 1; 
-                currentTranslate = { x: 0, y: 0 };
-                imgPos = { x: 0, y: 0 };
-                
-                modal.innerHTML = `
-                    <div class="modal-content-image">
-                        <div class="image-viewer-header">
-                            <h3 class="image-viewer-title">${imageTitle}</h3>
-                            <button class="close-viewer-btn" onclick="closeModal()">&times;</button>
-                        </div>
-                        <div class="image-viewer-container" id="imageViewerContainer">
-                            <img src="${imageUrl}" class="modal-image-view" id="zoomedImage" draggable="false">
-                        </div>
-                        <div class="viewer-controls">
-                            <button class="ctrl-btn" onclick="adjustZoom(-0.25)" title="ซูมออก">➖</button>
-                            <span class="ctrl-divider"></span>
-                            <span class="zoom-level-text" id="zoomLevelDisplay">100%</span>
-                            <span class="ctrl-divider"></span>
-                            <button class="ctrl-btn" onclick="adjustZoom(0.25)" title="ซูมเข้า">➕</button>
-                            <span class="ctrl-divider"></span>
-                            <button class="ctrl-btn" onclick="resetZoom()" title="พอดีจอ">🖥️</button>
-                        </div>
-                    </div>
-                `;
-
-                setTimeout(() => {
-                    const container = document.getElementById('imageViewerContainer');
-                    const img = document.getElementById('zoomedImage');
-
-                    container.addEventListener('wheel', function(e) {
-                        e.preventDefault();
-                        if (e.deltaY < 0) { adjustZoom(0.1); } 
-                        else { adjustZoom(-0.1); }
-                    });
-
-                    img.addEventListener('mousedown', function(e) {
-                        if (currentZoomScale > 1) {
-                            isDragging = true;
-                            startPos = { x: e.clientX - imgPos.x, y: e.clientY - imgPos.y };
-                            container.style.cursor = 'grabbing';
-                        }
-                    });
-
-                    window.addEventListener('mousemove', function(e) {
-                        if (!isDragging) return;
-                        e.preventDefault();
-                        imgPos = { x: e.clientX - startPos.x, y: e.clientY - startPos.y };
-                        updateTransform();
-                    });
-
-                    window.addEventListener('mouseup', function() {
-                        isDragging = false;
-                        if (container) container.style.cursor = currentZoomScale > 1 ? 'grab' : 'default';
-                    });
-                    
-                    container.addEventListener('click', function(e) {
-                        if(e.target === container) closeModal();
-                    });
-                }, 100);
-
-            } 
-            else if (type === 'allImages') {
-                let totalFound = 0;
-                let contentHtml = '';
-
-                if (overviewImage) {
-                    totalFound++;
-                    const ext = overviewImage.blob.type.split('/')[1] === 'jpeg' ? 'jpg' : 'png';
-                    const fileName = `รายงานอุปกรณ์ IOT.${ext}`;
-                    contentHtml += `
-                        <div class="modal-section-wrapper" style="border-left: 4px solid var(--accent-primary);">
-                            <h3 class="modal-section-title">⭐ รูปภาพรวม (ไฟล์เดี่ยว)</h3>
-                            <div class="preview-grid">
-                                <div class="preview-item">
-                                    <div class="preview-img-wrapper">
-                                        <img src="${overviewImage.url}" onclick="openModal('imageView', '${overviewImage.url}', '${fileName}')">
-                                    </div>
-                                    <div class="preview-name">${fileName}</div>
+            // เรนเดอร์ภาพรวม
+            if (overviewImage) {
+                totalFound++;
+                const ext = overviewImage.blob.type.split('/')[1] === 'jpeg' ? 'jpg' : 'png';
+                const fileName = `รายงานอุปกรณ์ IOT.${ext}`;
+                contentHtml += `
+                    <div class="modal-section-wrapper" style="border-left: 4px solid var(--accent-primary);">
+                        <h3 class="modal-section-title">⭐ รูปภาพรวม (ไฟล์เดี่ยว)</h3>
+                        <div class="preview-grid">
+                            <div class="preview-item">
+                                <div class="preview-img-wrapper">
+                                    <img src="${overviewImage.url}" onclick="openViewerModal('${overviewImage.url}', '${fileName}')">
                                 </div>
+                                <div class="preview-name">${fileName}</div>
                             </div>
                         </div>
-                    `;
-                }
-
-                imageList.forEach((folderImgs, folderIndex) => {
-                    if (folderImgs.length > 0) {
-                        totalFound += folderImgs.length;
-                        const folderInfo = presetFolders[folderIndex];
-                        let imgsHtml = '';
-                        
-                        folderImgs.forEach((item, imgIndex) => {
-                            const ext = item.blob.type.split('/')[1] === 'jpeg' ? 'jpg' : 'png';
-                            const fileName = `${folderInfo.name}_${imgIndex + 1}.${ext}`;
-                            imgsHtml += `
-                                <div class="preview-item">
-                                    <div class="preview-img-wrapper">
-                                        <img src="${item.url}" onclick="openModal('imageView', '${item.url}', '${fileName}')">
-                                    </div>
-                                    <div class="preview-name" title="${fileName}">${fileName}</div>
-                                </div>
-                            `;
-                        });
-
-                        const badgeColor = folderImgs.length >= folderInfo.target ? "var(--success)" : "var(--accent-primary)";
-                        contentHtml += `
-                            <div class="modal-section-wrapper">
-                                <h3 class="modal-section-title">📂 ${folderInfo.name} 
-                                    <span class="badge" style="margin-left:auto; background:${badgeColor}; color:white;">${folderImgs.length} / ${folderInfo.target} รูป</span>
-                                </h3>
-                                <div class="preview-grid">${imgsHtml}</div>
-                            </div>
-                        `;
-                    }
-                });
-
-                if (totalFound === 0) {
-                    contentHtml = `
-                        <div style="text-align:center; padding: 60px 20px;">
-                            <div style="font-size:4em; margin-bottom:15px;">📭</div>
-                            <h3 style="color:var(--text-main);">กล่องว่างเปล่า</h3>
-                            <p style="color:var(--text-sub);">ยังไม่ได้ใส่รูปภาพเตรียมไว้เลย</p>
-                        </div>
-                    `;
-                }
-
-                modal.innerHTML = `
-                    <div class="modal-content-list">
-                        <div class="modal-header">
-                            <h2>📋 ตรวจสอบภาพก่อนดาวน์โหลด</h2>
-                            <button class="close-modal" onclick="closeModal()">&times;</button>
-                        </div>
-                        <div class="modal-body">${contentHtml}</div>
                     </div>
                 `;
             }
 
-            modal.style.display = 'flex';
-            setTimeout(() => modal.classList.add('show'), 10);
+            // เรนเดอร์แต่ละนิคม
+            imageList.forEach((folderImgs, folderIndex) => {
+                if (folderImgs.length > 0) {
+                    totalFound += folderImgs.length;
+                    const folderInfo = presetFolders[folderIndex];
+                    let imgsHtml = '';
+                    
+                    folderImgs.forEach((item, imgIndex) => {
+                        const ext = item.blob.type.split('/')[1] === 'jpeg' ? 'jpg' : 'png';
+                        const fileName = `${folderInfo.name}_${imgIndex + 1}.${ext}`;
+                        imgsHtml += `
+                            <div class="preview-item">
+                                <div class="preview-img-wrapper">
+                                    <img src="${item.url}" onclick="openViewerModal('${item.url}', '${fileName}')">
+                                </div>
+                                <div class="preview-name" title="${fileName}">${fileName}</div>
+                            </div>
+                        `;
+                    });
+
+                    const badgeColor = folderImgs.length >= folderInfo.target ? "var(--success)" : "var(--accent-primary)";
+                    contentHtml += `
+                        <div class="modal-section-wrapper">
+                            <h3 class="modal-section-title">📂 ${folderInfo.name} 
+                                <span class="badge" style="margin-left:auto; background:${badgeColor}; color:white;">${folderImgs.length} / ${folderInfo.target} รูป</span>
+                            </h3>
+                            <div class="preview-grid">${imgsHtml}</div>
+                        </div>
+                    `;
+                }
+            });
+
+            if (totalFound === 0) {
+                contentHtml = `
+                    <div style="text-align:center; padding: 60px 20px;">
+                        <div style="font-size:4em; margin-bottom:15px;">📭</div>
+                        <h3 style="color:var(--text-main);">กล่องว่างเปล่า</h3>
+                        <p style="color:var(--text-sub);">ยังไม่ได้ใส่รูปภาพเตรียมไว้เลย</p>
+                    </div>
+                `;
+            }
+
+            listContent.innerHTML = `
+                <div class="modal-header">
+                    <h2>📋 ตรวจสอบภาพก่อนดาวน์โหลด</h2>
+                    <button class="close-modal" onclick="closeListModal()">&times;</button>
+                </div>
+                <div class="modal-body">${contentHtml}</div>
+            `;
+
+            const listModal = document.getElementById('listModal');
+            listModal.style.display = 'flex';
+            setTimeout(() => listModal.classList.add('show'), 10);
         }
 
+        function closeListModal() {
+            const listModal = document.getElementById('listModal');
+            listModal.classList.remove('show');
+            setTimeout(() => {
+                listModal.style.display = 'none';
+                document.getElementById('listModalContent').innerHTML = ''; 
+            }, 300);
+        }
+
+        // --- ระบบ Viewer Modal ---
+        let currentZoomScale = 1;
+        let isDragging = false;
+        let startPos = { x: 0, y: 0 };
+        let imgPos = { x: 0, y: 0 };
+        let isWindowEventsBound = false;
+
+        function bindViewerEvents() {
+            if(isWindowEventsBound) return;
+            window.addEventListener('mousemove', function(e) {
+                if (!isDragging) return;
+                e.preventDefault();
+                imgPos = { x: e.clientX - startPos.x, y: e.clientY - startPos.y };
+                updateTransform();
+            });
+            window.addEventListener('mouseup', function() {
+                isDragging = false;
+                const container = document.getElementById('imageViewerContainer');
+                if (container) container.style.cursor = currentZoomScale > 1 ? 'grab' : 'default';
+            });
+            isWindowEventsBound = true;
+        }
+
+        function openViewerModal(imageUrl, imageTitle) {
+            const viewerModal = document.getElementById('viewerModal');
+            currentZoomScale = 1; 
+            imgPos = { x: 0, y: 0 };
+            isDragging = false;
+            
+            viewerModal.innerHTML = `
+                <div class="modal-content-image">
+                    <div class="image-viewer-header">
+                        <h3 class="image-viewer-title">${imageTitle}</h3>
+                        <button class="close-viewer-btn" onclick="closeViewerModal()">&times;</button>
+                    </div>
+                    
+                    <div class="image-viewer-container" id="imageViewerContainer" onclick="toggleZoom(event)">
+                        <img src="${imageUrl}" class="modal-image-view" id="zoomedImage" draggable="false">
+                    </div>
+
+                    <div class="viewer-controls">
+                        <button class="ctrl-btn" onclick="adjustZoom(-0.25)" title="ซูมออก">➖</button>
+                        <span class="ctrl-divider"></span>
+                        <span class="zoom-level-text" id="zoomLevelDisplay">100%</span>
+                        <span class="ctrl-divider"></span>
+                        <button class="ctrl-btn" onclick="adjustZoom(0.25)" title="ซูมเข้า">➕</button>
+                        <span class="ctrl-divider"></span>
+                        <button class="ctrl-btn" onclick="resetZoom()" title="พอดีจอ">🖥️</button>
+                    </div>
+                </div>
+            `;
+
+            bindViewerEvents();
+
+            // Set up scroll wheel event
+            setTimeout(() => {
+                const container = document.getElementById('imageViewerContainer');
+                const img = document.getElementById('zoomedImage');
+
+                container.addEventListener('wheel', function(e) {
+                    e.preventDefault();
+                    if (e.deltaY < 0) { adjustZoom(0.1); } 
+                    else { adjustZoom(-0.1); }
+                });
+
+                img.addEventListener('mousedown', function(e) {
+                    if (currentZoomScale > 1) {
+                        isDragging = true;
+                        startPos = { x: e.clientX - imgPos.x, y: e.clientY - imgPos.y };
+                        container.style.cursor = 'grabbing';
+                    }
+                });
+            }, 10);
+
+            viewerModal.style.display = 'flex';
+            setTimeout(() => viewerModal.classList.add('show'), 10);
+        }
+
+        function closeViewerModal() {
+            const viewerModal = document.getElementById('viewerModal');
+            viewerModal.classList.remove('show');
+            setTimeout(() => {
+                viewerModal.style.display = 'none';
+                viewerModal.innerHTML = ''; 
+            }, 300);
+        }
+
+        // จัดการคลิกพื้นหลังของ Modal ทั้งคู่
+        window.onclick = function(event) {
+            const listModal = document.getElementById('listModal');
+            const viewerModal = document.getElementById('viewerModal');
+            
+            if (event.target === viewerModal || event.target.id === 'imageViewerContainer') {
+                closeViewerModal();
+            } else if (event.target === listModal) {
+                closeListModal();
+            }
+        }
+
+        // --- ฟังก์ชันเสริมของการซูม ---
         function adjustZoom(amount) {
             const img = document.getElementById('zoomedImage');
             if(!img) return;
@@ -893,20 +951,24 @@
             document.getElementById('zoomLevelDisplay').innerText = `100%`;
         }
 
+        function toggleZoom(event) {
+            if(event.target.id === 'zoomedImage') {
+                if(currentZoomScale <= 1) {
+                    currentZoomScale = 1.5; 
+                    document.getElementById('imageViewerContainer').style.cursor = 'grab';
+                } else {
+                    currentZoomScale = 1;
+                    imgPos = { x: 0, y: 0 };
+                    document.getElementById('imageViewerContainer').style.cursor = 'default';
+                }
+                updateTransform();
+                document.getElementById('zoomLevelDisplay').innerText = `${Math.round(currentZoomScale * 100)}%`;
+            }
+        }
+
         function updateTransform() {
             const img = document.getElementById('zoomedImage');
             if(img) { img.style.transform = `translate(${imgPos.x}px, ${imgPos.y}px) scale(${currentZoomScale})`; }
-        }
-
-        function closeModal() {
-            const modal = document.getElementById('dynamicModal');
-            modal.classList.remove('show');
-            setTimeout(() => { modal.style.display = 'none'; modal.innerHTML = ''; }, 300);
-        }
-
-        window.onclick = function(event) {
-            const modal = document.getElementById('dynamicModal');
-            if (event.target === modal) closeModal();
         }
 
         // --- 8. ZIP Download ---
