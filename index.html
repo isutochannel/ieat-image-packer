@@ -7,43 +7,42 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
-    <!-- ใช้ Font Noto Sans Thai เพื่อความสวยงามอ่านง่าย -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;600;700&display=swap" rel="stylesheet">
     
     <style>
         /* -------------------------------------------
-           🎨 THEME & VARIABLES (ปรับโทนสีใหม่ให้พรีเมียมขึ้น)
+           🎨 THEME & VARIABLES (ขาว-ฟ้า สบายตา)
         -------------------------------------------- */
         :root {
-            /* โทนสว่าง: ขาว-ฟ้า (Clean & Fresh) */
-            --bg-body: #f0fdf4; /* ฟ้าอมเขียวอ่อนๆ สะอาดตา */
+            /* โทนสว่าง: ขาว-ฟ้า */
+            --bg-body: #eef2ff; /* ฟ้าอ่อนมาก สบายตา */
             --bg-card: #ffffff;
             --text-main: #0f172a;
             --text-sub: #64748b;
             --border-color: #e2e8f0;
-            --accent-primary: #0ea5e9; /* ฟ้า Sky Blue */
-            --accent-hover: #0284c7;
-            --accent-glow: rgba(14, 165, 233, 0.2);
+            --accent-primary: #3b82f6; /* ฟ้า Blue */
+            --accent-hover: #2563eb;
+            --accent-glow: rgba(59, 130, 246, 0.15);
             --folder-bg: #f8fafc;
             --folder-hover: #f1f5f9;
-            --folder-active-bg: #e0f2fe;
-            --folder-active-border: #38bdf8;
-            --danger: #f43f5e;
+            --folder-active-bg: #eff6ff;
+            --folder-active-border: #60a5fa;
+            --danger: #ef4444;
             --success: #10b981;
             
             --shadow-sm: 0 2px 8px -2px rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 10px 30px -10px rgba(14, 165, 233, 0.1);
-            --shadow-lg: 0 20px 40px -10px rgba(14, 165, 233, 0.2);
+            --shadow-md: 0 10px 30px -10px rgba(59, 130, 246, 0.15);
+            --shadow-lg: 0 20px 40px -10px rgba(59, 130, 246, 0.2);
             
-            --radius-card: 24px;
-            --radius-btn: 16px;
-            --transition-bounce: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            --radius-card: 20px;
+            --radius-btn: 12px;
+            --transition-bounce: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
             --transition-smooth: all 0.3s ease;
         }
 
         body.dark-theme {
-            /* โทนมืด: มืด-ฟ้า (Deep & Modern) */
-            --bg-body: #0b1120;
+            /* โทนมืด: มืด-ฟ้า */
+            --bg-body: #0b1121;
             --bg-card: #1e293b;
             --text-main: #f8fafc;
             --text-sub: #94a3b8;
@@ -58,21 +57,17 @@
             
             --shadow-sm: 0 2px 8px -2px rgba(0, 0, 0, 0.5);
             --shadow-md: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
-            --shadow-lg: 0 20px 40px -10px rgba(14, 165, 233, 0.15);
         }
 
-        /* -------------------------------------------
-           ✨ GLOBAL STYLES
-        -------------------------------------------- */
         * { box-sizing: border-box; }
         
         body {
             font-family: 'Noto Sans Thai', sans-serif;
             background-color: var(--bg-body);
             color: var(--text-main);
-            max-width: 1200px; /* ขยายให้พอดีจอยิ่งขึ้น */
+            max-width: 1200px; 
             margin: 0 auto;
-            padding: 40px 20px;
+            padding: 30px 20px 100px 20px;
             transition: background-color 0.4s ease, color 0.4s ease;
             line-height: 1.6;
         }
@@ -81,127 +76,120 @@
            🎩 HEADER AREA
         -------------------------------------------- */
         .header-wrapper {
-            display: flex; justify-content: space-between; align-items: flex-start;
-            margin-bottom: 40px; padding: 0 10px;
+            display: flex; justify-content: space-between; align-items: flex-end;
+            margin-bottom: 30px; padding: 0 5px;
         }
         .header-title-group h2 { 
             margin: 0 0 5px 0; font-weight: 700; font-size: 2.2em; 
-            background: linear-gradient(135deg, var(--accent-primary), #6366f1);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            color: var(--accent-primary);
         }
-        .header-title-group p { margin: 0; color: var(--text-sub); font-size: 1.1em; }
+        .header-title-group p { margin: 0; color: var(--text-sub); font-size: 1.05em; font-weight: 600; }
         
         .theme-toggle {
             background-color: var(--bg-card); color: var(--text-main);
-            border: 1px solid var(--border-color); padding: 12px 24px;
+            border: 1px solid var(--border-color); padding: 10px 20px;
             border-radius: 30px; cursor: pointer; font-weight: 600; font-family: inherit;
             transition: var(--transition-bounce); box-shadow: var(--shadow-sm);
             display: flex; align-items: center; gap: 8px;
         }
         .theme-toggle:hover { border-color: var(--accent-primary); transform: translateY(-3px); box-shadow: var(--shadow-md); }
-        .theme-toggle:active { transform: scale(0.95); }
 
-        /* แจ้งเตือน Save */
         #saveNotification {
             position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-150%);
             background: var(--accent-primary); color: white; padding: 12px 24px;
             border-radius: 30px; font-weight: 600; font-size: 0.95em;
-            box-shadow: 0 10px 25px rgba(14, 165, 233, 0.4); z-index: 9999;
+            box-shadow: var(--shadow-lg); z-index: 9999;
             transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.5s ease;
             opacity: 0; pointer-events: none;
         }
         #saveNotification.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
         /* -------------------------------------------
-           📦 MAIN LAYOUT (CSS GRID)
+           📦 MAIN LAYOUT
         -------------------------------------------- */
         .main-layout {
             display: grid;
-            grid-template-columns: 3fr 4fr; /* แบ่งสัดส่วนซ้ายขวา */
-            gap: 30px;
+            grid-template-columns: 1fr 1.3fr; /* ซ้ายเล็กกว่าขวานิดนึง */
+            gap: 25px;
         }
         @media (max-width: 900px) {
             .main-layout { grid-template-columns: 1fr; }
         }
 
         .card {
-            background: var(--bg-card); padding: 30px; border-radius: var(--radius-card);
-            box-shadow: var(--shadow-md); border: 1px solid rgba(255,255,255,0.05);
+            background: var(--bg-card); padding: 25px; border-radius: var(--radius-card);
+            box-shadow: var(--shadow-sm); border: 1px solid rgba(255,255,255,0.05);
             transition: var(--transition-smooth);
         }
-        .card-header {
-            display: flex; align-items: center; gap: 10px; margin-bottom: 20px;
-        }
-        .card-header h3 { margin: 0; font-size: 1.3em; color: var(--text-main); font-weight: 700; }
-        .card-header .icon { font-size: 1.5em; }
+        .card:hover { box-shadow: var(--shadow-md); }
+        
+        .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; }
+        .card-header h3 { margin: 0; font-size: 1.2em; color: var(--text-main); font-weight: 700; }
+        .card-header .icon { font-size: 1.4em; }
 
         /* -------------------------------------------
-           🖱️ INTERACTIVE ZONES (Drag/Drop/Paste)
+           🖱️ DRAG & DROP
         -------------------------------------------- */
         .drop-zone {
             border: 2px dashed var(--border-color); background-color: var(--folder-bg);
-            padding: 35px 20px; text-align: center; border-radius: var(--radius-card);
+            padding: 25px 15px; text-align: center; border-radius: 16px;
             color: var(--text-sub); transition: var(--transition-bounce); position: relative;
-            display: flex; flex-direction: column; align-items: center; gap: 10px;
-            cursor: pointer; overflow: hidden;
+            display: flex; flex-direction: column; align-items: center; gap: 8px;
+            cursor: pointer; overflow: hidden; margin-bottom: 15px;
         }
-        .drop-zone::before { /* เอฟเฟกต์แสงวิ่งตอน Active */
+        .drop-zone::before {
             content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0;
             background: var(--accent-glow); opacity: 0; transition: opacity 0.3s ease;
         }
-        .drop-zone-icon { font-size: 2.5em; color: var(--accent-primary); transition: transform 0.3s ease; }
-        .drop-zone-text { font-size: 1.1em; font-weight: 600; z-index: 1; }
+        .drop-zone-icon { font-size: 2.2em; color: var(--accent-primary); transition: transform 0.3s ease; }
+        .drop-zone-text { font-size: 1em; font-weight: 600; z-index: 1; color: var(--text-main); }
         .drop-zone-sub { font-size: 0.85em; opacity: 0.8; z-index: 1; }
 
         .drop-zone:hover { border-color: var(--accent-primary); transform: translateY(-2px); }
-        .drop-zone:hover .drop-zone-icon { transform: scale(1.1) translateY(-5px); }
+        .drop-zone:hover .drop-zone-icon { transform: scale(1.1) translateY(-3px); }
         
         .drop-zone.active-target {
             border-color: var(--accent-primary); background-color: var(--folder-active-bg);
-            border-style: solid; box-shadow: 0 0 0 6px var(--accent-glow);
+            border-style: solid; box-shadow: 0 0 0 4px var(--accent-glow);
         }
         .drop-zone.active-target::before { opacity: 1; }
         .drop-zone.active-target .drop-zone-icon { transform: scale(1.1); animation: float 2s ease-in-out infinite; }
         
         @keyframes float {
             0% { transform: translateY(0px) scale(1.1); }
-            50% { transform: translateY(-6px) scale(1.1); }
+            50% { transform: translateY(-5px) scale(1.1); }
             100% { transform: translateY(0px) scale(1.1); }
         }
 
         /* -------------------------------------------
-           📁 FOLDER SELECTION LIST
+           📁 FOLDER LIST (ฝั่งซ้าย)
         -------------------------------------------- */
         .folder-list {
             display: flex; flex-direction: column; gap: 8px;
-            max-height: 500px; overflow-y: auto; padding-right: 10px;
+            max-height: 400px; overflow-y: auto; padding-right: 5px;
         }
-        /* แต่ง Scrollbar */
-        .folder-list::-webkit-scrollbar { width: 6px; }
-        .folder-list::-webkit-scrollbar-track { background: var(--folder-bg); border-radius: 10px; }
+        .folder-list::-webkit-scrollbar { width: 5px; }
+        .folder-list::-webkit-scrollbar-track { background: transparent; }
         .folder-list::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
-        .folder-list::-webkit-scrollbar-thumb:hover { background: var(--text-sub); }
 
         .folder-item {
             display: flex; align-items: center; justify-content: space-between;
-            background: var(--folder-bg); padding: 12px 20px; border-radius: var(--radius-btn);
-            border: 2px solid transparent; cursor: pointer; transition: var(--transition-bounce);
+            background: var(--folder-bg); padding: 12px 18px; border-radius: var(--radius-btn);
+            border: 1px solid transparent; cursor: pointer; transition: var(--transition-bounce);
         }
-        .folder-item-left { display: flex; align-items: center; gap: 12px; }
-        .folder-icon { font-size: 1.4em; transition: transform 0.3s; }
+        .folder-item-left { display: flex; align-items: center; gap: 10px; }
+        .folder-icon { font-size: 1.3em; transition: transform 0.3s; }
         .folder-name { font-weight: 600; font-size: 0.95em; }
         
         .badge {
-            background: var(--border-color); color: var(--text-sub); padding: 4px 12px;
-            border-radius: 20px; font-size: 0.85em; font-weight: 700; transition: var(--transition-smooth);
+            background: var(--border-color); color: var(--text-sub); padding: 3px 10px;
+            border-radius: 20px; font-size: 0.8em; font-weight: 700; transition: var(--transition-smooth);
         }
 
-        .folder-item:hover { background: var(--folder-hover); transform: translateX(5px); }
-        .folder-item:hover .folder-icon { transform: scale(1.1) rotate(5deg); }
-        
+        .folder-item:hover { background: var(--folder-hover); border-color: var(--border-color); }
         .folder-item.active-folder {
             border-color: var(--folder-active-border); background: var(--folder-active-bg);
-            transform: translateX(10px); box-shadow: -5px 5px 15px var(--accent-glow);
+            box-shadow: 0 4px 12px var(--accent-glow);
         }
         .folder-item.active-folder .badge { background: var(--accent-primary); color: #fff; }
 
@@ -209,84 +197,82 @@
            🖼️ PREVIEW GALLERIES
         -------------------------------------------- */
         @keyframes popIn {
-            0% { opacity: 0; transform: scale(0.8) translateY(20px); }
+            0% { opacity: 0; transform: scale(0.8) translateY(15px); }
             100% { opacity: 1; transform: scale(1) translateY(0); }
         }
 
         .preview-section {
-            background: var(--folder-bg); padding: 25px; border-radius: var(--radius-card);
-            border: 1px solid var(--border-color); margin-top: 25px; min-height: 200px;
+            background: var(--bg-body); padding: 20px; border-radius: 16px;
+            border: 1px solid var(--border-color); margin-top: 20px; min-height: 150px;
         }
         .preview-header {
-            display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
+            display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;
+            padding-bottom: 10px; border-bottom: 1px solid var(--border-color);
         }
-        .preview-header h4 { margin: 0; color: var(--text-main); font-weight: 700; font-size: 1.1em; }
-        .preview-header span { color: var(--accent-primary); }
+        .preview-header h4 { margin: 0; color: var(--text-main); font-weight: 700; font-size: 1.05em; display: flex; align-items: center; gap: 8px;}
+        .count-tag { background: var(--accent-primary); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.85em; font-weight: bold; }
 
         .preview-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px;
         }
         
         .preview-item {
-            position: relative; background: var(--bg-card); border-radius: 16px;
-            padding: 8px; box-shadow: var(--shadow-sm); border: 1px solid var(--border-color);
-            animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            position: relative; background: var(--bg-card); border-radius: 12px;
+            padding: 6px; box-shadow: var(--shadow-sm); border: 1px solid var(--border-color);
+            animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
             transition: var(--transition-bounce);
         }
-        .preview-item:hover { transform: translateY(-5px); box-shadow: var(--shadow-md); border-color: var(--accent-primary); }
+        .preview-item:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); border-color: var(--accent-primary); }
         
         .preview-img-wrapper {
-            position: relative; width: 100%; height: 110px; overflow: hidden; border-radius: 10px; cursor: zoom-in;
+            position: relative; width: 100%; height: 100px; overflow: hidden; border-radius: 8px; cursor: zoom-in;
         }
         .preview-img-wrapper img {
-            width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease;
+            width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease;
         }
         .preview-item:hover .preview-img-wrapper img { transform: scale(1.1); }
         
         .preview-name {
-            margin: 8px 0 2px 0; font-size: 0.8em; font-weight: 600; text-align: center;
+            margin: 6px 0 2px 0; font-size: 0.75em; font-weight: 600; text-align: center;
             white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-sub);
         }
 
         .delete-btn {
             position: absolute; top: -8px; right: -8px; background: var(--bg-card); color: var(--danger);
-            border: 2px solid var(--danger); border-radius: 50%; width: 28px; height: 28px; 
+            border: 2px solid var(--danger); border-radius: 50%; width: 26px; height: 26px; 
             cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center;
             box-shadow: 0 4px 10px rgba(244, 63, 94, 0.2); transition: var(--transition-bounce); z-index: 10;
         }
-        .delete-btn:hover { background: var(--danger); color: white; transform: scale(1.2) rotate(90deg); }
+        .delete-btn:hover { background: var(--danger); color: white; transform: scale(1.1) rotate(90deg); }
 
-        /* ภาพรวมเดี่ยวๆ */
-        .overview-single-preview {
-            max-width: 300px; margin: 0 auto;
-        }
-        .overview-single-preview .preview-img-wrapper { height: 180px; }
+        /* พรีวิวภาพรวม (ฝั่งซ้าย) */
+        .overview-single-preview { margin-top: 15px; }
+        .overview-single-preview .preview-img-wrapper { height: 140px; }
 
         /* -------------------------------------------
            🔘 FLOATING ACTION BAR
         -------------------------------------------- */
         .action-bar {
-            position: sticky; bottom: 30px; display: flex; gap: 15px; justify-content: center;
-            background: var(--bg-card); padding: 15px 25px; border-radius: 100px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.1); border: 1px solid var(--border-color);
-            margin: 40px auto 0 auto; width: fit-content; z-index: 100;
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            display: flex; gap: 12px; background: var(--bg-card); padding: 12px 20px; border-radius: 100px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15); border: 1px solid var(--border-color); z-index: 100;
         }
         
         .btn {
-            padding: 14px 28px; border: none; border-radius: 30px; cursor: pointer;
-            font-size: 1em; font-weight: 700; font-family: inherit; transition: var(--transition-bounce);
-            display: flex; align-items: center; gap: 8px; justify-content: center;
+            padding: 12px 24px; border: none; border-radius: 30px; cursor: pointer;
+            font-size: 0.95em; font-weight: 700; font-family: inherit; transition: var(--transition-bounce);
+            display: flex; align-items: center; gap: 6px; justify-content: center;
         }
         .btn:active { transform: scale(0.95); }
 
-        .btn-primary { background: linear-gradient(135deg, var(--accent-primary), #3b82f6); color: white; box-shadow: 0 8px 20px var(--accent-glow); }
-        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 12px 25px var(--accent-glow); filter: brightness(1.1); }
+        .btn-primary { background: linear-gradient(135deg, var(--accent-primary), #4f46e5); color: white; box-shadow: 0 4px 15px var(--accent-glow); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px var(--accent-glow); }
         
         .btn-secondary { background: var(--folder-bg); color: var(--text-main); border: 1px solid var(--border-color); }
-        .btn-secondary:hover { background: var(--folder-hover); transform: translateY(-3px); border-color: var(--accent-primary); }
+        .btn-secondary:hover { background: var(--border-color); transform: translateY(-2px); }
 
         .btn-danger-outline { background: transparent; color: var(--danger); }
-        .btn-danger-outline:hover { background: #fff1f2; transform: translateY(-3px); }
+        .btn-danger-outline:hover { background: #fff1f2; transform: translateY(-2px); }
 
         /* -------------------------------------------
            🔍 MODAL (POPUP VIEW)
@@ -294,7 +280,7 @@
         .modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background-color: rgba(15, 23, 42, 0.85); z-index: 9999;
-            justify-content: center; align-items: center; backdrop-filter: blur(10px);
+            justify-content: center; align-items: center; backdrop-filter: blur(8px);
             opacity: 0; transition: opacity 0.3s ease;
         }
         .modal.show { opacity: 1; }
@@ -302,11 +288,10 @@
             background-color: var(--bg-card); border-radius: var(--radius-card);
             width: 90%; max-height: 85vh; overflow-y: auto; padding: 0;
             position: relative; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
-            animation: popIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
             border: 1px solid rgba(255,255,255,0.1);
         }
-        /* Custom Scrollbar for Modal */
-        .modal-content::-webkit-scrollbar { width: 8px; }
+        .modal-content::-webkit-scrollbar { width: 6px; }
         .modal-content::-webkit-scrollbar-track { background: transparent; }
         .modal-content::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
 
@@ -315,19 +300,19 @@
             border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;
             z-index: 10; border-radius: var(--radius-card) var(--radius-card) 0 0;
         }
-        .modal-header h2 { margin: 0; font-size: 1.5em; color: var(--text-main); }
+        .modal-header h2 { margin: 0; font-size: 1.4em; color: var(--text-main); }
         .modal-body { padding: 30px; }
 
         .close-modal {
-            background: var(--folder-bg); border: none; width: 40px; height: 40px; border-radius: 50%;
-            font-size: 1.5em; display: flex; align-items: center; justify-content: center;
+            background: var(--folder-bg); border: none; width: 36px; height: 36px; border-radius: 50%;
+            font-size: 1.2em; display: flex; align-items: center; justify-content: center;
             color: var(--text-sub); cursor: pointer; transition: var(--transition-bounce);
         }
         .close-modal:hover { background: #fee2e2; color: var(--danger); transform: rotate(90deg); }
 
-        .modal-image-view { max-width: 100%; max-height: 70vh; object-fit: contain; border-radius: 16px; display: block; margin: 0 auto; box-shadow: var(--shadow-lg); }
-        .modal-section-title { margin-top: 0; font-size: 1.2em; color: var(--text-main); display: flex; align-items: center; gap: 10px; }
-        .modal-section-wrapper { background: var(--folder-bg); padding: 20px; border-radius: var(--radius-card); margin-bottom: 20px; border: 1px solid var(--border-color); }
+        .modal-image-view { max-width: 100%; max-height: 70vh; object-fit: contain; border-radius: 12px; display: block; margin: 0 auto; }
+        .modal-section-title { margin-top: 0; font-size: 1.1em; color: var(--text-main); display: flex; align-items: center; gap: 10px; margin-bottom: 15px;}
+        .modal-section-wrapper { background: var(--folder-bg); padding: 20px; border-radius: 16px; margin-bottom: 20px; border: 1px solid var(--border-color); }
     </style>
 </head>
 <body>
@@ -338,22 +323,22 @@
     <!-- Header -->
     <div class="header-wrapper">
         <div class="header-title-group">
-            <h2 id="mainHeader">📦 IEAT Packer</h2>
-            <p id="dateSubtext">เตรียมไฟล์สำหรับ: (กำลังโหลดวันที่...)</p>
+            <h2 id="mainHeader">📦 ภาพหลักฐาน IEAT กนอ.</h2>
+            <p id="dateSubtext">ประจำวันที่: กำลังโหลด...</p>
         </div>
         <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">
             <span id="themeIcon">🌙</span> <span id="themeText">โหมดมืด</span>
         </button>
     </div>
 
-    <!-- Main Content Grid -->
+    <!-- Main Content -->
     <div class="main-layout">
         
-        <!-- ฝั่งซ้าย: โซนเลือกและวางรูป -->
+        <!-- ฝั่งซ้าย: ภาพรวม & รายชื่อโฟลเดอร์ -->
         <div class="left-panel">
             
             <!-- การ์ด 1: ภาพรวม -->
-            <div class="card" style="margin-bottom: 30px;">
+            <div class="card" style="margin-bottom: 25px;">
                 <div class="card-header">
                     <span class="icon">⭐</span>
                     <h3>รูปภาพรวม (อุปกรณ์ IOT)</h3>
@@ -361,8 +346,13 @@
                 
                 <div class="drop-zone" id="pasteAreaOverview" onclick="selectSection('overview')">
                     <div class="drop-zone-icon">📥</div>
-                    <div class="drop-zone-text">วางรูปภาพที่นี่ (Ctrl+V)</div>
-                    <div class="drop-zone-sub">หรือลากไฟล์มาใส่ • รับได้ 1 ภาพ</div>
+                    <div class="drop-zone-text">คลิกแล้วกด Ctrl+V ที่นี่</div>
+                    <div class="drop-zone-sub">รับได้ 1 ภาพ (วางภาพใหม่จะทับภาพเดิม)</div>
+                </div>
+
+                <!-- พรีวิวภาพรวม ย้ายมาอยู่ใต้กล่องฝั่งซ้ายแล้ว -->
+                <div id="overviewPreviewSection" style="display: none;">
+                    <div class="overview-single-preview" id="overviewPreviewContainer"></div>
                 </div>
             </div>
 
@@ -370,7 +360,7 @@
             <div class="card">
                 <div class="card-header">
                     <span class="icon">📂</span>
-                    <h3>รายชื่อนิคมอุตสาหกรรม</h3>
+                    <h3>เลือกนิคมอุตสาหกรรม</h3>
                 </div>
                 <div class="folder-list" id="folderList">
                     <!-- สร้างโดย JS -->
@@ -379,46 +369,32 @@
 
         </div>
 
-        <!-- ฝั่งขวา: โซนแสดงผลลัพธ์ -->
+        <!-- ฝั่งขวา: พื้นที่ทำงานของโฟลเดอร์ที่เลือก -->
         <div class="right-panel">
             
-            <!-- โซนรอรับภาพของนิคมที่เลือก -->
             <div class="card" style="height: 100%; display: flex; flex-direction: column;">
-                <div class="card-header" style="justify-content: space-between;">
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <span class="icon">🎯</span>
-                        <h3>พื้นที่ทำงาน: <span id="currentFolderNameDisplay" style="color: var(--accent-primary);">บางชัน</span></h3>
-                    </div>
+                <div class="card-header">
+                    <span class="icon">🎯</span>
+                    <h3>พื้นที่ทำงาน: <span id="currentFolderNameDisplay" style="color: var(--accent-primary);">บางชัน</span></h3>
                 </div>
 
-                <div class="drop-zone" id="pasteAreaFolder" onclick="selectSection('folder')" style="flex: 1; justify-content: center; min-height: 180px;">
+                <div class="drop-zone" id="pasteAreaFolder" onclick="selectSection('folder')" style="flex: 1; justify-content: center; min-height: 200px;">
                     <div class="drop-zone-icon">📸</div>
-                    <div class="drop-zone-text">วางรูปภาพสำหรับนิคมนี้ (Ctrl+V)</div>
-                    <div class="drop-zone-sub">รับได้หลายภาพ • ลากไฟล์มาใส่ได้เลย</div>
-                </div>
-
-                <!-- แสดงพรีวิวภาพรวม (ถ้ามี) -->
-                <div id="overviewPreviewSection" style="display: none;">
-                    <div class="preview-section">
-                        <div class="preview-header">
-                            <h4>⭐ รูปภาพรวม (1 ภาพ)</h4>
-                        </div>
-                        <div class="overview-single-preview" id="overviewPreviewContainer"></div>
-                    </div>
+                    <div class="drop-zone-text">คลิกแล้วกด Ctrl+V เพื่อเพิ่มรูปในนิคมนี้</div>
+                    <div class="drop-zone-sub">ลากไฟล์หลายๆ รูปมาปล่อยพร้อมกันได้เลย</div>
                 </div>
 
                 <!-- แสดงพรีวิวภาพนิคม -->
                 <div class="preview-section" id="folderPreviewSection">
                     <div class="preview-header">
-                        <h4>ภาพในโฟลเดอร์นี้</h4>
-                        <span class="badge" style="background: var(--accent-primary); color: white;"><span id="imgCount">0</span> รูป</span>
+                        <h4>ภาพในโฟลเดอร์นี้ <span class="count-tag" id="currentFolderImgCount">0 รูป</span></h4>
                     </div>
                     
                     <div class="preview-grid" id="previewContainer">
                         <!-- ตัวอย่างภาพจะขึ้นตรงนี้ -->
                     </div>
                     
-                    <div id="emptyStateMsg" style="text-align: center; color: var(--text-sub); padding: 40px 0; font-style: italic;">
+                    <div id="emptyStateMsg" style="text-align: center; color: var(--text-sub); padding: 30px 0; font-style: italic;">
                         ยังไม่มีรูปภาพในโฟลเดอร์นี้
                     </div>
                 </div>
@@ -427,24 +403,23 @@
         </div>
     </div>
 
-    <!-- Floating Action Bar ด้านล่าง -->
+    <!-- Floating Action Bar -->
     <div class="action-bar">
-        <button class="btn btn-danger-outline" onclick="clearAllData()" title="เริ่มงานใหม่">
-            <span>🗑️</span> ล้างข้อมูล
+        <button class="btn btn-danger-outline" onclick="clearAllData()" title="ล้างรูปทั้งหมดเริ่มใหม่">
+            <span>🗑️</span> ล้างกระดาน
         </button>
         <button class="btn btn-secondary" onclick="openModal('allImages')">
-            <span>🔍</span> ตรวจสอบภาพ
+            <span>🔍</span> ตรวจสอบรูปภาพ
         </button>
         <button class="btn btn-primary" onclick="downloadZip()">
-            <span>📦</span> สร้างไฟล์ ZIP
+            <span>📦</span> ดาวน์โหลดไฟล์ ZIP
         </button>
     </div>
 
-    <!-- Modal เอนกประสงค์ -->
+    <!-- Modal ป๊อปอัป -->
     <div id="dynamicModal" class="modal">
         <div class="modal-content" id="modalContentBox">
-            <!-- ส่วนหัว Modal จะถูกแทรกด้วย JS -->
-            <!-- ส่วนเนื้อหา Modal จะถูกแทรกด้วย JS -->
+            <!-- ข้อมูลยัดผ่าน JS -->
         </div>
     </div>
 
@@ -452,13 +427,8 @@
         // --- 1. ข้อมูลพื้นฐาน ---
         const today = new Date();
         const dateString = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-        document.getElementById('dateSubtext').innerText = `เตรียมไฟล์ประจำวันที่: ${dateString}`;
+        document.getElementById('dateSubtext').innerText = `ประจำวันที่: ${dateString}`;
         
-        // ซ่อน Input วันที่เดิมไว้ (แต่ยังเก็บค่าไว้ใช้ตอนดาวน์โหลด)
-        const zipDateInput = document.createElement('input');
-        zipDateInput.type = 'hidden'; zipDateInput.id = 'zipDate'; zipDateInput.value = dateString;
-        document.body.appendChild(zipDateInput);
-
         const presetFolders = [
             "นิคมอุตสาหกรรมบางชัน", "นิคมอุตสาหกรรมบางพลี", "นิคมอุตสาหกรรมบางปู",
             "นิคมอุตสาหกรรมแก่งคอย", "นิคมอุตสาหกรรมลาดกระบัง", "นิคมอุตสาหกรรมนครหลวง (อยุธยา)",
@@ -473,7 +443,7 @@
         let activeFolderIndex = 0; 
         let isAppReady = false; 
 
-        // --- 2. ระบบธีม (จดจำค่า) ---
+        // --- 2. ระบบธีม ---
         function initTheme() {
             const savedTheme = localStorage.getItem('ieatTheme') || 'light';
             if (savedTheme === 'dark') {
@@ -497,7 +467,7 @@
             else { icon.innerText = '🌙'; text.innerText = 'โหมดมืด'; }
         }
 
-        // --- 3. ระบบ Database (LocalForage) ---
+        // --- 3. ระบบ Database ---
         function saveDataToDB() {
             if (!isAppReady) return; 
             const appState = {
@@ -505,11 +475,11 @@
                 overviewBlob: overviewImage ? overviewImage.blob : null,
                 folderBlobs: imageList.map(folder => folder.map(item => item.blob))
             };
-            localforage.setItem('ieatAppDataV2', appState).catch(err => console.error("Save Error:", err));
+            localforage.setItem('ieatAppDataV3', appState).catch(err => console.error("Save Error:", err));
         }
 
         function loadDataFromDB() {
-            localforage.getItem('ieatAppDataV2').then(function(appState) {
+            localforage.getItem('ieatAppDataV3').then(function(appState) {
                 if(appState) {
                     if (appState.overviewBlob) {
                         overviewImage = { blob: appState.overviewBlob, url: URL.createObjectURL(appState.overviewBlob) };
@@ -528,7 +498,7 @@
                     if (appState.overviewBlob || (appState.folderBlobs && appState.folderBlobs.some(arr => arr.length > 0))) {
                         const notif = document.getElementById('saveNotification');
                         notif.classList.add('show');
-                        setTimeout(() => { notif.classList.remove('show'); }, 4000);
+                        setTimeout(() => { notif.classList.remove('show'); }, 3000);
                     }
                 }
                 isAppReady = true; 
@@ -546,12 +516,11 @@
                 overviewImage = null;
                 imageList = Array.from({length: presetFolders.length}, () => []);
                 
-                localforage.removeItem('ieatAppDataV2').then(() => {
+                localforage.removeItem('ieatAppDataV3').then(() => {
                     renderOverview();
                     presetFolders.forEach((_, i) => updateBadge(i));
                     selectSection('folder', 0);
                     
-                    // แสดงแจ้งเตือนแทน Alert
                     const notif = document.getElementById('saveNotification');
                     notif.innerText = "✨ ล้างกระดานเรียบร้อย พร้อมลุยต่อ!";
                     notif.style.background = "var(--success)";
@@ -559,7 +528,7 @@
                     setTimeout(() => { 
                         notif.classList.remove('show'); 
                         setTimeout(()=>{ notif.innerText = "💾 กู้คืนข้อมูลงานล่าสุดเรียบร้อยแล้ว"; notif.style.background = "var(--accent-primary)"; }, 500);
-                    }, 3000);
+                    }, 2500);
                 });
             }
         }
@@ -576,7 +545,7 @@
                 div.innerHTML = `
                     <div class="folder-item-left">
                         <span class="folder-icon">📂</span>
-                        <span class="folder-name">${name.replace('นิคมอุตสาหกรรม', '')}</span> <!-- ย่อคำให้ดูคลีนขึ้นในเมนู -->
+                        <span class="folder-name">${name.replace('นิคมอุตสาหกรรม', '')}</span>
                     </div>
                     <span class="badge" id="badge_${i}">0</span>
                 `;
@@ -609,8 +578,6 @@
                     
                     const activeItem = document.getElementById(`folderItem_${folderIndex}`);
                     activeItem.classList.add('active-folder');
-                    
-                    // เลื่อนเมนูให้อยู่ตรงกลางจอ
                     activeItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
                 }
                 renderFolderPreviews();
@@ -618,7 +585,7 @@
             if(shouldSave) saveDataToDB();
         }
 
-        // --- 5. จัดการรูปภาพ (Paste/Drag) ---
+        // --- 5. จัดการรูปภาพ ---
         function processFiles(files, targetSection) {
             let pastedOverview = false;
             let pastedFolder = false;
@@ -702,7 +669,6 @@
             const count = imageList[index].length;
             badge.innerText = count;
             
-            // ทำให้สี Badge ชัดขึ้นถ้ามีรูป
             if(count > 0 && !document.getElementById(`folderItem_${index}`).classList.contains('active-folder')) {
                 badge.style.background = "var(--text-sub)";
                 badge.style.color = "white";
@@ -749,11 +715,13 @@
                 emptyMsg.style.display = 'block';
             }
             
-            document.getElementById('currentFolderNameDisplay').innerText = folderName;
-            document.getElementById('imgCount').innerText = currentFolderImgs.length;
+            document.getElementById('currentFolderNameDisplay').innerText = folderName.replace('นิคมอุตสาหกรรม', '');
+            
+            // อัปเดตตัวเลขในกรอบสีน้ำเงินด้านขวาให้ชัดเจน
+            document.getElementById('currentFolderImgCount').innerText = `${currentFolderImgs.length} รูป`;
         }
 
-        // --- 7. Modal (ป๊อปอัป) ---
+        // --- 7. Modal ---
         function openModal(type, imageUrl = '', imageTitle = '') {
             const box = document.getElementById('modalContentBox');
             box.innerHTML = '';
@@ -780,7 +748,7 @@
                     const ext = overviewImage.blob.type.split('/')[1] === 'jpeg' ? 'jpg' : 'png';
                     contentHtml += `
                         <div class="modal-section-wrapper" style="border-left: 4px solid var(--accent-primary);">
-                            <h3 class="modal-section-title">⭐ รูปภาพรวมด้านนอก</h3>
+                            <h3 class="modal-section-title">⭐ รูปภาพรวม (ไฟล์เดี่ยว)</h3>
                             <div class="preview-grid">
                                 <div class="preview-item">
                                     <div class="preview-img-wrapper">
@@ -826,14 +794,14 @@
                         <div style="text-align:center; padding: 60px 20px;">
                             <div style="font-size:4em; margin-bottom:15px;">📭</div>
                             <h3 style="color:var(--text-main);">กล่องว่างเปล่า</h3>
-                            <p style="color:var(--text-sub);">ยังไม่ได้ใส่รูปภาพเตรียมไว้เลย ลองวางสักรูปสิครับ</p>
+                            <p style="color:var(--text-sub);">ยังไม่ได้ใส่รูปภาพเตรียมไว้เลย</p>
                         </div>
                     `;
                 }
 
                 box.innerHTML = `
                     <div class="modal-header">
-                        <h2>📋 ตรวจสอบภาพก่อนสร้าง ZIP</h2>
+                        <h2>📋 ตรวจสอบภาพก่อนดาวน์โหลด</h2>
                         <button class="close-modal" onclick="closeModal()">&times;</button>
                     </div>
                     <div class="modal-body">${contentHtml}</div>
@@ -865,8 +833,7 @@
             }
 
             const zip = new JSZip();
-            const dateVal = document.getElementById('zipDate').value;
-            const finalZipName = `ภาพหลักฐาน_IEAT_กนอ_${dateVal}.zip`;
+            const finalZipName = `ภาพหลักฐาน_IEAT_กนอ_${dateString}.zip`;
 
             if (overviewImage) {
                 const ext = overviewImage.blob.type.split('/')[1] === 'jpeg' ? 'jpg' : 'png';
@@ -884,10 +851,9 @@
                 });
             }
 
-            // แสดงสถานะว่ากำลังโหลด
             const btn = document.querySelector('.btn-primary');
             const originalText = btn.innerHTML;
-            btn.innerHTML = '<span>⏳</span> กำลังประมวลผล...';
+            btn.innerHTML = '<span>⏳</span> ประมวลผล...';
             btn.style.pointerEvents = 'none';
 
             zip.generateAsync({type: "blob"}).then(function(content) {
@@ -897,7 +863,6 @@
             });
         }
 
-        // เริ่มต้น
         initFolders();
     </script>
 </body>
