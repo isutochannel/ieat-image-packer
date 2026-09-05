@@ -198,6 +198,7 @@
             border-color: var(--folder-active-border); background: var(--folder-active-bg);
             box-shadow: 0 4px 12px var(--accent-glow);
         }
+        /* ถ้า active และยังไม่ complete ให้ป้ายเป็นสี accent */
         .folder-item.active-folder .badge:not(.completed) { background: var(--accent-primary); color: #fff; }
 
         /* -------------------------------------------
@@ -220,7 +221,7 @@
         .preview-item:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); border-color: var(--accent-primary); }
         
         .preview-img-wrapper { position: relative; width: 100%; height: 100px; overflow: hidden; border-radius: 8px; cursor: zoom-in; }
-        .preview-img-wrapper img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
+        .preview-img-wrapper img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; background-color: #fff;}
         .preview-item:hover .preview-img-wrapper img { transform: scale(1.1); }
         
         .preview-name { margin: 6px 0 2px 0; font-size: 0.75em; font-weight: 600; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-sub); }
@@ -258,7 +259,7 @@
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 9999; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.3s ease; }
         .modal.show { opacity: 1; }
         
-        /* Modal - List view (z-index ต่ำกว่า Viewer) */
+        /* Modal - List view */
         #listModal { background-color: rgba(15, 23, 42, 0.85); backdrop-filter: blur(5px); }
         .modal-content-list { background-color: var(--bg-card); border-radius: var(--radius-card); width: 90%; max-height: 85vh; overflow-y: auto; padding: 0; position: relative; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5); animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; border: 1px solid rgba(255,255,255,0.1); }
         .modal-content-list::-webkit-scrollbar { width: 6px; }
@@ -272,12 +273,12 @@
         .modal-section-title { margin-top: 0; font-size: 1.1em; color: var(--text-main); display: flex; align-items: center; gap: 10px; margin-bottom: 15px;}
         .modal-section-wrapper { background: var(--folder-bg); padding: 20px; border-radius: 16px; margin-bottom: 20px; border: 1px solid var(--border-color); }
 
-        /* Modal - Image Viewer (z-index สูงสุด ซ้อนทับ List ได้) */
+        /* Modal - Image Viewer */
         #viewerModal { background-color: rgba(0, 0, 0, 0.95); z-index: 10005; backdrop-filter: blur(8px); }
         .modal-content-image { width: 100vw; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative; }
         .image-viewer-container { width: 100%; height: 100%; overflow: hidden; display: flex; justify-content: center; align-items: center; padding: 20px; cursor: grab; }
         .image-viewer-container:active { cursor: grabbing; }
-        .modal-image-view { max-width: 90vw; max-height: 90vh; object-fit: contain; border-radius: 8px; display: block; margin: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5); transition: transform 0.1s ease-out; transform-origin: center center; }
+        .modal-image-view { max-width: 90vw; max-height: 90vh; object-fit: contain; border-radius: 8px; display: block; margin: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5); transition: transform 0.1s ease-out; transform-origin: center center; background-color: #fff; }
         
         .image-viewer-header { position: absolute; top: 0; left: 0; width: 100%; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 100%); z-index: 10; }
         .image-viewer-title { color: white; margin: 0; font-size: 1.2em; text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
@@ -318,7 +319,7 @@
                 <div class="drop-zone" id="pasteAreaOverview" onclick="selectSection('overview')">
                     <div class="drop-zone-icon">📥</div>
                     <div class="drop-zone-text">คลิกแล้วกด Ctrl+V ที่นี่</div>
-                    <div class="drop-zone-sub">รับได้ 1 ภาพ (วางภาพใหม่จะทับภาพเดิม)</div>
+                    <div class="drop-zone-sub">รับได้ 1 ภาพ (แปลงเป็น PNG อัตโนมัติ)</div>
                 </div>
                 <div id="overviewPreviewSection" style="display: none;">
                     <div class="overview-single-preview" id="overviewPreviewContainer"></div>
@@ -359,7 +360,7 @@
                 <div class="drop-zone" id="pasteAreaFolder" onclick="selectSection('folder')" style="flex: 1; justify-content: center; min-height: 150px;">
                     <div class="drop-zone-icon">📸</div>
                     <div class="drop-zone-text">คลิกแล้วกด Ctrl+V เพื่อเพิ่มรูปในนิคมนี้</div>
-                    <div class="drop-zone-sub">ลากไฟล์หลายๆ รูปมาปล่อยพร้อมกันได้เลย</div>
+                    <div class="drop-zone-sub">ลากไฟล์มาปล่อยพร้อมกันได้เลย (แปลงเป็น PNG อัตโนมัติ)</div>
                 </div>
 
                 <div class="preview-section" id="folderPreviewSection">
@@ -390,19 +391,14 @@
         </button>
     </div>
 
-    <!-- 🌟 ระบบ Multi-Modal แยก 2 ชั้น (List & Viewer) 🌟 -->
-    
+    <!-- 🌟 ระบบ Multi-Modal แยก 2 ชั้น 🌟 -->
     <!-- Modal 1: ดูรายการภาพทั้งหมด -->
     <div id="listModal" class="modal">
-        <div class="modal-content-list" id="listModalContent">
-            <!-- ยัดผ่าน JS -->
-        </div>
+        <div class="modal-content-list" id="listModalContent"></div>
     </div>
 
-    <!-- Modal 2: ซูมดูภาพเดียว (ทับบน Modal 1 ได้) -->
-    <div id="viewerModal" class="modal">
-        <!-- ยัดผ่าน JS -->
-    </div>
+    <!-- Modal 2: ซูมดูภาพเดียว -->
+    <div id="viewerModal" class="modal"></div>
 
     <script>
         // --- 1. ข้อมูลพื้นฐาน ---
@@ -410,7 +406,6 @@
         const dateString = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
         document.getElementById('dateSubtext').innerText = `ประจำวันที่: ${dateString}`;
         
-        // ข้อมูลนิคม พร้อมเป้าหมายจำนวนภาพ
         const presetFolders = [
             { name: "นิคมอุตสาหกรรมบางชัน", target: 8 },
             { name: "นิคมอุตสาหกรรมบางพลี", target: 12 },
@@ -434,7 +429,29 @@
         let activeFolderIndex = 0; 
         let isAppReady = false; 
 
-        // --- 2. ระบบธีม ---
+        // --- 2. ระบบแปลงภาพเป็น PNG ---
+        function ensurePng(blob) {
+            return new Promise((resolve) => {
+                if (blob.type === 'image/png') {
+                    resolve(blob);
+                } else {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0);
+                        canvas.toBlob((newBlob) => {
+                            resolve(newBlob);
+                        }, 'image/png');
+                    };
+                    img.src = URL.createObjectURL(blob);
+                }
+            });
+        }
+
+        // --- 3. ระบบธีม ---
         function initTheme() {
             const isDark = document.documentElement.classList.contains('dark-theme');
             updateThemeUI(isDark);
@@ -452,7 +469,7 @@
             else { icon.innerText = '🌙'; text.innerText = 'โหมดมืด'; }
         }
 
-        // --- 3. ระบบ Database ---
+        // --- 4. ระบบ Database ---
         function saveDataToDB() {
             if (!isAppReady) return; 
             const appState = {
@@ -460,11 +477,12 @@
                 overviewBlob: overviewImage ? overviewImage.blob : null,
                 folderBlobs: imageList.map(folder => folder.map(item => item.blob))
             };
-            localforage.setItem('ieatAppDataV8', appState).catch(err => console.error("Save Error:", err));
+            // เปลี่ยน Key เป็น V9 เพื่อเคลียร์ Cache รูปเก่าที่เป็น JPEG
+            localforage.setItem('ieatAppDataV9', appState).catch(err => console.error("Save Error:", err));
         }
 
         function loadDataFromDB() {
-            localforage.getItem('ieatAppDataV8').then(function(appState) {
+            localforage.getItem('ieatAppDataV9').then(function(appState) {
                 if(appState) {
                     if (appState.overviewBlob) {
                         overviewImage = { blob: appState.overviewBlob, url: URL.createObjectURL(appState.overviewBlob) };
@@ -499,7 +517,7 @@
                 overviewImage = null;
                 imageList = Array.from({length: presetFolders.length}, () => []);
                 
-                localforage.removeItem('ieatAppDataV8').then(() => {
+                localforage.removeItem('ieatAppDataV9').then(() => {
                     renderOverview();
                     presetFolders.forEach((_, i) => updateBadge(i));
                     selectSection('folder', 0);
@@ -516,7 +534,7 @@
             }
         }
 
-        // --- 4. การทำงานของ UI ---
+        // --- 5. การทำงานของ UI ---
         function initFolders() {
             const list = document.getElementById('folderList');
             presetFolders.forEach((folder, i) => {
@@ -567,14 +585,16 @@
             if(shouldSave) saveDataToDB();
         }
 
-        // --- 5. จัดการรูปภาพ ---
-        function processFiles(files, targetSection) {
+        // --- 6. จัดการรูปภาพ (แปลง PNG ก่อน) ---
+        async function processFiles(files, targetSection) {
             let pastedOverview = false;
             let pastedFolder = false;
 
             for (let i = 0; i < files.length; i++) {
                 if (files[i].type.indexOf('image') !== -1) {
-                    const blob = files[i];
+                    const originalBlob = files[i];
+                    // บังคับแปลงเป็น PNG
+                    const blob = await ensurePng(originalBlob);
                     const url = URL.createObjectURL(blob);
                     
                     if (targetSection === 'overview') {
@@ -596,9 +616,7 @@
         }
 
         document.addEventListener('paste', function(e) {
-            // ไม่รับ Paste ถ้ายืนอยู่หน้าดูภาพ
             if(document.getElementById('listModal').classList.contains('show') || document.getElementById('viewerModal').classList.contains('show')) return;
-
             const items = (e.clipboardData || e.originalEvent.clipboardData).items;
             const files = [];
             for (let i = 0; i < items.length; i++) {
@@ -617,15 +635,14 @@
             });
         }
 
-        // --- 6. แสดงผล UI ภาพหลัก ---
+        // --- 7. แสดงผล UI ภาพหลัก ---
         function renderOverview() {
             const section = document.getElementById('overviewPreviewSection');
             const container = document.getElementById('overviewPreviewContainer');
             
             if (overviewImage) {
                 section.style.display = 'block';
-                const ext = overviewImage.blob.type.split('/')[1] === 'jpeg' ? 'jpg' : 'png';
-                const fileName = `รายงานอุปกรณ์ IOT.${ext}`;
+                const fileName = `รายงานอุปกรณ์ IOT.png`;
                 
                 container.innerHTML = `
                     <div class="preview-item">
@@ -691,8 +708,7 @@
             if(currentFolderImgs.length > 0) {
                 emptyMsg.style.display = 'none';
                 currentFolderImgs.forEach((item, imgIndex) => {
-                    const ext = item.blob.type.split('/')[1] === 'jpeg' ? 'jpg' : 'png';
-                    const fileName = `${folderInfo.name}_${imgIndex + 1}.${ext}`;
+                    const fileName = `${folderInfo.name}_${imgIndex + 1}.png`;
                     
                     const div = document.createElement('div');
                     div.className = 'preview-item';
@@ -714,7 +730,6 @@
             const countTag = document.getElementById('currentFolderImgCount');
             countTag.innerText = `${currentFolderImgs.length} / ${folderInfo.target} รูป`;
             
-            // อัปเดตกล่องโน้ตและ Progress Bar
             document.getElementById('reminderStatusText').innerText = `${currentFolderImgs.length} / ${folderInfo.target} ภาพ`;
             
             let progressPct = (currentFolderImgs.length / folderInfo.target) * 100;
@@ -732,18 +747,15 @@
             }
         }
 
-        // --- 7. ระบบ Multi-Modal (แยก List กับ Viewer) ---
-        
+        // --- 8. ระบบ Multi-Modal ---
         function openListModal() {
             const listContent = document.getElementById('listModalContent');
             let totalFound = 0;
             let contentHtml = '';
 
-            // เรนเดอร์ภาพรวม
             if (overviewImage) {
                 totalFound++;
-                const ext = overviewImage.blob.type.split('/')[1] === 'jpeg' ? 'jpg' : 'png';
-                const fileName = `รายงานอุปกรณ์ IOT.${ext}`;
+                const fileName = `รายงานอุปกรณ์ IOT.png`;
                 contentHtml += `
                     <div class="modal-section-wrapper" style="border-left: 4px solid var(--accent-primary);">
                         <h3 class="modal-section-title">⭐ รูปภาพรวม (ไฟล์เดี่ยว)</h3>
@@ -759,7 +771,6 @@
                 `;
             }
 
-            // เรนเดอร์แต่ละนิคม
             imageList.forEach((folderImgs, folderIndex) => {
                 if (folderImgs.length > 0) {
                     totalFound += folderImgs.length;
@@ -767,8 +778,7 @@
                     let imgsHtml = '';
                     
                     folderImgs.forEach((item, imgIndex) => {
-                        const ext = item.blob.type.split('/')[1] === 'jpeg' ? 'jpg' : 'png';
-                        const fileName = `${folderInfo.name}_${imgIndex + 1}.${ext}`;
+                        const fileName = `${folderInfo.name}_${imgIndex + 1}.png`;
                         imgsHtml += `
                             <div class="preview-item">
                                 <div class="preview-img-wrapper">
@@ -877,7 +887,6 @@
 
             bindViewerEvents();
 
-            // Set up scroll wheel event
             setTimeout(() => {
                 const container = document.getElementById('imageViewerContainer');
                 const img = document.getElementById('zoomedImage');
@@ -910,7 +919,6 @@
             }, 300);
         }
 
-        // จัดการคลิกพื้นหลังของ Modal ทั้งคู่
         window.onclick = function(event) {
             const listModal = document.getElementById('listModal');
             const viewerModal = document.getElementById('viewerModal');
@@ -922,22 +930,18 @@
             }
         }
 
-        // --- ฟังก์ชันเสริมของการซูม ---
         function adjustZoom(amount) {
             const img = document.getElementById('zoomedImage');
             if(!img) return;
-            
             currentZoomScale += amount;
             if(currentZoomScale < 0.5) currentZoomScale = 0.5;
             if(currentZoomScale > 5) currentZoomScale = 5;
-            
             if(currentZoomScale <= 1) {
                 imgPos = { x: 0, y: 0 };
                 document.getElementById('imageViewerContainer').style.cursor = 'default';
             } else {
                 document.getElementById('imageViewerContainer').style.cursor = 'grab';
             }
-
             updateTransform();
             document.getElementById('zoomLevelDisplay').innerText = `${Math.round(currentZoomScale * 100)}%`;
         }
@@ -971,7 +975,7 @@
             if(img) { img.style.transform = `translate(${imgPos.x}px, ${imgPos.y}px) scale(${currentZoomScale})`; }
         }
 
-        // --- 8. ZIP Download ---
+        // --- 9. ZIP Download ---
         function downloadZip() {
             let totalFolderImgs = imageList.reduce((sum, arr) => sum + arr.length, 0);
             if (totalFolderImgs === 0 && !overviewImage) {
@@ -982,8 +986,8 @@
             const finalZipName = `ภาพหลักฐาน_IEAT_กนอ_${dateString}.zip`;
 
             if (overviewImage) {
-                const ext = overviewImage.blob.type.split('/')[1] === 'jpeg' ? 'jpg' : 'png';
-                zip.file(`รายงานอุปกรณ์ IOT.${ext}`, overviewImage.blob);
+                // ไฟล์ถูกแปลงเป็น PNG มาตั้งแต่ตอนใส่แล้ว
+                zip.file(`รายงานอุปกรณ์ IOT.png`, overviewImage.blob);
             }
 
             for(let i = 0; i < presetFolders.length; i++) {
@@ -991,8 +995,7 @@
                 const folder = zip.folder(folderInfo.name);
                 
                 imageList[i].forEach((item, imgIndex) => {
-                    const ext = item.blob.type.split('/')[1] === 'jpeg' ? 'jpg' : 'png';
-                    const fileName = `${folderInfo.name}_${imgIndex + 1}.${ext}`;
+                    const fileName = `${folderInfo.name}_${imgIndex + 1}.png`;
                     folder.file(fileName, item.blob);
                 });
             }
@@ -1007,7 +1010,6 @@
             });
         }
 
-        // เริ่มต้น
         initFolders();
     </script>
 </body>
